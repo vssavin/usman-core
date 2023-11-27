@@ -9,7 +9,7 @@
 
     <parent>
         <groupId>com.github.vssavin</groupId>
-        <artifactId>usman-core</artifactId>
+        <artifactId>usman-core-main</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 

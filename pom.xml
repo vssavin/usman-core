@@ -3,13 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.vssavin</groupId>
-    <artifactId>usman-core</artifactId>
+    <artifactId>usman-core-main</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
         <module>usman-core-spring5</module>
         <module>usman-core-spring6</module>
+        <module>usman-core</module>
     </modules>
 
 </project>
