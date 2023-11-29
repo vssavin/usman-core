@@ -55,7 +55,7 @@ public class UsmanPasswordEncodingArgumentsHandler extends AbstractApplicationAr
     }
 
     @Override
-    protected void processArgs() {
+    public void processArgs() {
         String[] args = getApplicationArguments();
         if (args.length > 0) {
             String argsString = Arrays.toString(args);

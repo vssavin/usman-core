@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * @author vssavin on 28.11.2023
  */
-abstract class AbstractApplicationArgumentsHandler {
+public abstract class AbstractApplicationArgumentsHandler {
 
     private final Logger log;
 
@@ -31,7 +31,7 @@ abstract class AbstractApplicationArgumentsHandler {
         this.beanFactory = beanFactory;
     }
 
-    protected abstract void processArgs();
+    public abstract void processArgs();
 
     protected String[] getApplicationArguments() {
         try {
