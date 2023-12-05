@@ -1,5 +1,7 @@
 package com.github.vssavin.usmancore.config;
 
+import org.springframework.http.HttpMethod;
+
 import java.util.Arrays;
 
 /**
@@ -9,7 +11,7 @@ import java.util.Arrays;
  */
 public class AuthorizedUrlPermission {
 
-    private static final String DEFAULT_HTTP_METHOD = "GET";
+    private static final String DEFAULT_HTTP_METHOD = HttpMethod.GET.name();
 
     private final String url;
 
