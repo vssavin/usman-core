@@ -8,22 +8,24 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 
 /**
- * Ensures that processing of application arguments for each component begins after it is created.
+ * Ensures that processing of application arguments for each component begins after it is
+ * created.
  *
  * @author vssavin on 29.11.2023
  */
 @Configuration
 public class ArgumentsHandlerStarter {
 
-    private final List<AbstractApplicationArgumentsHandler> argumentsHandlerList;
+	private final List<AbstractApplicationArgumentsHandler> argumentsHandlerList;
 
-    @Autowired
-    public ArgumentsHandlerStarter(List<AbstractApplicationArgumentsHandler> argumentsHandlerList) {
-        this.argumentsHandlerList = argumentsHandlerList;
-    }
+	@Autowired
+	public ArgumentsHandlerStarter(List<AbstractApplicationArgumentsHandler> argumentsHandlerList) {
+		this.argumentsHandlerList = argumentsHandlerList;
+	}
 
-    @PostConstruct
-    private void processArgs() {
-        argumentsHandlerList.forEach(AbstractApplicationArgumentsHandler::processArgs);
-    }
+	@PostConstruct
+	private void processArgs() {
+		argumentsHandlerList.forEach(AbstractApplicationArgumentsHandler::processArgs);
+	}
+
 }

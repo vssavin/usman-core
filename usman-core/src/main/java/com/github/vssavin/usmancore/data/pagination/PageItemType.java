@@ -7,6 +7,6 @@ package com.github.vssavin.usmancore.data.pagination;
  */
 public enum PageItemType {
 
-    DOTS, PAGE
+	DOTS, PAGE
 
 }

@@ -8,8 +8,8 @@ package com.github.vssavin.usmancore.exception.auth;
  */
 public class AuthenticationForbiddenException extends RuntimeException {
 
-    public AuthenticationForbiddenException(String message) {
-        super(message);
-    }
+	public AuthenticationForbiddenException(String message) {
+		super(message);
+	}
 
 }

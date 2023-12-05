@@ -17,74 +17,79 @@ import javax.sql.DataSource;
  */
 public class UsmanDataSourceConfig {
 
-    private static final Logger log = LoggerFactory.getLogger(UsmanDataSourceConfig.class);
+	private static final Logger log = LoggerFactory.getLogger(UsmanDataSourceConfig.class);
 
-    private final UsmanDatabaseConfig usmanDatabaseConfig;
+	private final UsmanDatabaseConfig usmanDatabaseConfig;
 
-    private final UsmanPasswordEncodingArgumentsHandler argumentsHandler;
+	private final UsmanPasswordEncodingArgumentsHandler argumentsHandler;
 
-    private DataSource umDataSource;
+	private DataSource umDataSource;
 
-    public UsmanDataSourceConfig(UsmanDatabaseConfig usmanDatabaseConfig,
-                                 UsmanPasswordEncodingArgumentsHandler argumentsHandler) {
-        this.usmanDatabaseConfig = usmanDatabaseConfig;
-        this.argumentsHandler = argumentsHandler;
-    }
+	public UsmanDataSourceConfig(UsmanDatabaseConfig usmanDatabaseConfig,
+			UsmanPasswordEncodingArgumentsHandler argumentsHandler) {
+		this.usmanDatabaseConfig = usmanDatabaseConfig;
+		this.argumentsHandler = argumentsHandler;
+	}
 
-    @Bean
-    protected DataSource umDataSource() {
-        if (this.umDataSource != null) {
-            return this.umDataSource;
-        }
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        try {
-            dataSource.setDriverClassName(usmanDatabaseConfig.getDriverClass());
-            String url = usmanDatabaseConfig.getUrl() + "/" + usmanDatabaseConfig.getName();
-            if (usmanDatabaseConfig.getDriverClass().equals("org.h2.Driver")) {
-                url += ";" + usmanDatabaseConfig.getAdditionalParams();
-            }
-            dataSource.setUrl(url);
-            dataSource.setUsername(usmanDatabaseConfig.getUser());
-            setDatasourcePassword(dataSource, argumentsHandler);
-        } catch (Exception e) {
-            log.error("Creating datasource error: ", e);
-        }
-        this.umDataSource = dataSource;
+	@Bean
+	protected DataSource umDataSource() {
+		if (this.umDataSource != null) {
+			return this.umDataSource;
+		}
+		DriverManagerDataSource dataSource = new DriverManagerDataSource();
+		try {
+			dataSource.setDriverClassName(usmanDatabaseConfig.getDriverClass());
+			String url = usmanDatabaseConfig.getUrl() + "/" + usmanDatabaseConfig.getName();
+			if (usmanDatabaseConfig.getDriverClass().equals("org.h2.Driver")) {
+				url += ";" + usmanDatabaseConfig.getAdditionalParams();
+			}
+			dataSource.setUrl(url);
+			dataSource.setUsername(usmanDatabaseConfig.getUser());
+			setDatasourcePassword(dataSource, argumentsHandler);
+		}
+		catch (Exception e) {
+			log.error("Creating datasource error: ", e);
+		}
+		this.umDataSource = dataSource;
 
-        return dataSource;
-    }
+		return dataSource;
+	}
 
-    @Bean
-    AbstractRoutingDataSource routingDataSource(
-            @Autowired(required = false) @Qualifier("appDataSource") DataSource appDataSource,
-            @Autowired(required = false) @Qualifier("dataSource") DataSource dataSource,
-            @Autowired DataSource umDataSource) {
-        RoutingDataSource routingDataSource = new RoutingDataSource();
-        DataSource ds = appDataSource != null ? appDataSource : dataSource;
-        routingDataSource.addDataSource(RoutingDataSource.DATASOURCE_TYPE.UM_DATASOURCE, umDataSource);
-        if (ds == null) {
-            routingDataSource.setKey(RoutingDataSource.DATASOURCE_TYPE.UM_DATASOURCE);
-            routingDataSource.setDefaultTargetDataSource(umDataSource);
-        } else {
-            routingDataSource.addDataSource(RoutingDataSource.DATASOURCE_TYPE.APPLICATION_DATASOURCE, ds);
-            routingDataSource.setDefaultTargetDataSource(ds);
-        }
+	@Bean
+	AbstractRoutingDataSource routingDataSource(
+			@Autowired(required = false) @Qualifier("appDataSource") DataSource appDataSource,
+			@Autowired(required = false) @Qualifier("dataSource") DataSource dataSource,
+			@Autowired DataSource umDataSource) {
+		RoutingDataSource routingDataSource = new RoutingDataSource();
+		DataSource ds = appDataSource != null ? appDataSource : dataSource;
+		routingDataSource.addDataSource(RoutingDataSource.DATASOURCE_TYPE.UM_DATASOURCE, umDataSource);
+		if (ds == null) {
+			routingDataSource.setKey(RoutingDataSource.DATASOURCE_TYPE.UM_DATASOURCE);
+			routingDataSource.setDefaultTargetDataSource(umDataSource);
+		}
+		else {
+			routingDataSource.addDataSource(RoutingDataSource.DATASOURCE_TYPE.APPLICATION_DATASOURCE, ds);
+			routingDataSource.setDefaultTargetDataSource(ds);
+		}
 
-        return routingDataSource;
-    }
+		return routingDataSource;
+	}
 
-    private void setDatasourcePassword(DriverManagerDataSource dataSource,
-                                       UsmanPasswordEncodingArgumentsHandler argumentsHandler) {
-        if (argumentsHandler.isDbPasswordEncoded()) {
-            try {
-                dataSource.setPassword(argumentsHandler.getPasswordService().decrypt(usmanDatabaseConfig.getPassword()));
-            } catch (Exception e) {
-                log.debug("Can't decrypt password! Using a password from the config...", e);
-                dataSource.setPassword(usmanDatabaseConfig.getPassword());
-            }
-        } else {
-            dataSource.setPassword(usmanDatabaseConfig.getPassword());
-        }
-    }
+	private void setDatasourcePassword(DriverManagerDataSource dataSource,
+			UsmanPasswordEncodingArgumentsHandler argumentsHandler) {
+		if (argumentsHandler.isDbPasswordEncoded()) {
+			try {
+				dataSource
+					.setPassword(argumentsHandler.getPasswordService().decrypt(usmanDatabaseConfig.getPassword()));
+			}
+			catch (Exception e) {
+				log.debug("Can't decrypt password! Using a password from the config...", e);
+				dataSource.setPassword(usmanDatabaseConfig.getPassword());
+			}
+		}
+		else {
+			dataSource.setPassword(usmanDatabaseConfig.getPassword());
+		}
+	}
 
 }

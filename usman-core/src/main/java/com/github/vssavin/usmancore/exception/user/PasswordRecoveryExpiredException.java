@@ -7,12 +7,12 @@ package com.github.vssavin.usmancore.exception.user;
  */
 public class PasswordRecoveryExpiredException extends RuntimeException {
 
-    PasswordRecoveryExpiredException(String message) {
-        super(message);
-    }
+	PasswordRecoveryExpiredException(String message) {
+		super(message);
+	}
 
-    PasswordRecoveryExpiredException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	PasswordRecoveryExpiredException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
 }

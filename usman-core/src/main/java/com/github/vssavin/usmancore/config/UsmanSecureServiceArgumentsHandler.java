@@ -21,98 +21,98 @@ import java.util.Map;
 @Configuration
 public class UsmanSecureServiceArgumentsHandler extends AbstractApplicationArgumentsHandler {
 
-    private static final String SECURE_SERVICE_PROP_NAME = "um.secureService";
+	private static final String SECURE_SERVICE_PROP_NAME = "um.secureService";
 
-    private static final Logger log = LoggerFactory.getLogger(UsmanSecureServiceArgumentsHandler.class);
+	private static final Logger log = LoggerFactory.getLogger(UsmanSecureServiceArgumentsHandler.class);
 
-    private final ApplicationContext context;
+	private final ApplicationContext context;
 
-    private final SecureService defaultSecureService;
+	private final SecureService defaultSecureService;
 
-    private SecureService secureService;
+	private SecureService secureService;
 
-    @Value("${" + SECURE_SERVICE_PROP_NAME + ":#{null}}")
-    private String secureServiceName;
+	@Value("${" + SECURE_SERVICE_PROP_NAME + ":#{null}}")
+	private String secureServiceName;
 
-    @Autowired
-    UsmanSecureServiceArgumentsHandler(ApplicationContext applicationContext, SecureService secureService) {
-        super(log, applicationContext);
-        this.context = applicationContext;
-        this.defaultSecureService = secureService;
-    }
+	@Autowired
+	UsmanSecureServiceArgumentsHandler(ApplicationContext applicationContext, SecureService secureService) {
+		super(log, applicationContext);
+		this.context = applicationContext;
+		this.defaultSecureService = secureService;
+	}
 
-    @Override
-    public void processArgs() {
-        String[] args = getApplicationArguments();
-        if (args.length > 0) {
-            String argsString = Arrays.toString(args);
-            log.debug("Application started with arguments: {}", argsString);
-            Map<String, String> mappedArgs = getMappedArgs(args);
+	@Override
+	public void processArgs() {
+		String[] args = getApplicationArguments();
+		if (args.length > 0) {
+			String argsString = Arrays.toString(args);
+			log.debug("Application started with arguments: {}", argsString);
+			Map<String, String> mappedArgs = getMappedArgs(args);
 
-            String serviceName = mappedArgs.get(SECURE_SERVICE_PROP_NAME);
+			String serviceName = mappedArgs.get(SECURE_SERVICE_PROP_NAME);
 
-            if (serviceName != null) {
-                this.secureServiceName = serviceName;
-            }
-        }
+			if (serviceName != null) {
+				this.secureServiceName = serviceName;
+			}
+		}
 
-        if (this.secureServiceName == null) {
-            String serviceName = System.getProperty(SECURE_SERVICE_PROP_NAME);
-            if (serviceName != null) {
-                this.secureServiceName = serviceName;
-            }
-        }
+		if (this.secureServiceName == null) {
+			String serviceName = System.getProperty(SECURE_SERVICE_PROP_NAME);
+			if (serviceName != null) {
+				this.secureServiceName = serviceName;
+			}
+		}
 
-        if (this.secureServiceName == null) {
-            String serviceName = System.getenv(SECURE_SERVICE_PROP_NAME);
-            if (serviceName != null) {
-                this.secureServiceName = serviceName;
-            }
-        }
+		if (this.secureServiceName == null) {
+			String serviceName = System.getenv(SECURE_SERVICE_PROP_NAME);
+			if (serviceName != null) {
+				this.secureServiceName = serviceName;
+			}
+		}
 
-        initSecureService(secureServiceName);
-    }
+		initSecureService(secureServiceName);
+	}
 
-    SecureService getSecureService() {
-        return secureService;
-    }
+	SecureService getSecureService() {
+		return secureService;
+	}
 
-    static String getSecureServicePropName() {
-        return SECURE_SERVICE_PROP_NAME;
-    }
+	static String getSecureServicePropName() {
+		return SECURE_SERVICE_PROP_NAME;
+	}
 
-    private void initSecureService(String secureServiceName) {
-        if (context == null || defaultSecureService == null) {
-            throw new IllegalStateException("Not initialized application context or default secure service!");
-        }
+	private void initSecureService(String secureServiceName) {
+		if (context == null || defaultSecureService == null) {
+			throw new IllegalStateException("Not initialized application context or default secure service!");
+		}
 
-        if (secureServiceName != null && !secureServiceName.isEmpty()) {
-            secureService = getSecureServiceByName(secureServiceName);
-        }
-        else {
-            log.warn("Secure service not specified! Using default secure service...");
-            secureService = defaultSecureService;
-        }
-    }
+		if (secureServiceName != null && !secureServiceName.isEmpty()) {
+			secureService = getSecureServiceByName(secureServiceName);
+		}
+		else {
+			log.warn("Secure service not specified! Using default secure service...");
+			secureService = defaultSecureService;
+		}
+	}
 
-    private SecureService getSecureServiceByName(String serviceName) {
-        SecureService service = null;
-        boolean beanFound = true;
-        try {
-            service = (SecureService) context.getBean(serviceName + "SecureService");
-        }
-        catch (NoSuchBeanDefinitionException ignore) {
-            try {
-                service = (SecureService) context.getBean(serviceName.toUpperCase() + "SecureService");
-            }
-            catch (NoSuchBeanDefinitionException e) {
-                beanFound = false;
-            }
-        }
-        if (!beanFound) {
-            throw new IllegalArgumentException(String.format("Service with name %s not found!", serviceName));
-        }
-        return service;
-    }
+	private SecureService getSecureServiceByName(String serviceName) {
+		SecureService service = null;
+		boolean beanFound = true;
+		try {
+			service = (SecureService) context.getBean(serviceName + "SecureService");
+		}
+		catch (NoSuchBeanDefinitionException ignore) {
+			try {
+				service = (SecureService) context.getBean(serviceName.toUpperCase() + "SecureService");
+			}
+			catch (NoSuchBeanDefinitionException e) {
+				beanFound = false;
+			}
+		}
+		if (!beanFound) {
+			throw new IllegalArgumentException(String.format("Service with name %s not found!", serviceName));
+		}
+		return service;
+	}
 
 }

@@ -27,90 +27,90 @@ import java.util.Map;
 @Configuration
 public class UsmanPasswordEncodingArgumentsHandler extends AbstractApplicationArgumentsHandler {
 
-    private static final String PRINT_ENCODE_PASSWORD_PROP_NAME = "um.ep";
+	private static final String PRINT_ENCODE_PASSWORD_PROP_NAME = "um.ep";
 
-    private static final String DB_PASSWORD_ENCODED_PROP_NAME = "um.db-password-encoded";
+	private static final String DB_PASSWORD_ENCODED_PROP_NAME = "um.db-password-encoded";
 
-    private static final Logger log = LoggerFactory.getLogger(UsmanPasswordEncodingArgumentsHandler.class);
+	private static final Logger log = LoggerFactory.getLogger(UsmanPasswordEncodingArgumentsHandler.class);
 
-    @Value("${" + PRINT_ENCODE_PASSWORD_PROP_NAME + ":#{null}}")
-    private String password;
+	@Value("${" + PRINT_ENCODE_PASSWORD_PROP_NAME + ":#{null}}")
+	private String password;
 
-    @Value("${" + DB_PASSWORD_ENCODED_PROP_NAME + ":#{false}}")
-    private boolean dbPasswordEncoded;
+	@Value("${" + DB_PASSWORD_ENCODED_PROP_NAME + ":#{false}}")
+	private boolean dbPasswordEncoded;
 
-    private final StringSafety stringSafety = new DefaultStringSafety();
+	private final StringSafety stringSafety = new DefaultStringSafety();
 
-    private final OSPlatformCrypt passwordService;
+	private final OSPlatformCrypt passwordService;
 
-    private final PrintStream passwordPrintStream;
+	private final PrintStream passwordPrintStream;
 
-    @Autowired
-    UsmanPasswordEncodingArgumentsHandler(ApplicationContext applicationContext,
-                                          @Qualifier("applicationSecureService") OSPlatformCrypt applicationSecureService,
-                                          @Autowired(required = false) PrintStream passwordPrintStream) {
-        super(log, applicationContext);
-        this.passwordPrintStream = passwordPrintStream;
-        this.passwordService = applicationSecureService;
-    }
+	@Autowired
+	UsmanPasswordEncodingArgumentsHandler(ApplicationContext applicationContext,
+			@Qualifier("applicationSecureService") OSPlatformCrypt applicationSecureService,
+			@Autowired(required = false) PrintStream passwordPrintStream) {
+		super(log, applicationContext);
+		this.passwordPrintStream = passwordPrintStream;
+		this.passwordService = applicationSecureService;
+	}
 
-    @Override
-    public void processArgs() {
-        String[] args = getApplicationArguments();
-        if (args.length > 0) {
-            String argsString = Arrays.toString(args);
-            log.debug("Application started with arguments: {}", argsString);
-            Map<String, String> mappedArgs = getMappedArgs(args);
-            String pass = mappedArgs.get(PRINT_ENCODE_PASSWORD_PROP_NAME);
-            if (pass != null) {
-                printPassword(pass);
-            }
+	@Override
+	public void processArgs() {
+		String[] args = getApplicationArguments();
+		if (args.length > 0) {
+			String argsString = Arrays.toString(args);
+			log.debug("Application started with arguments: {}", argsString);
+			Map<String, String> mappedArgs = getMappedArgs(args);
+			String pass = mappedArgs.get(PRINT_ENCODE_PASSWORD_PROP_NAME);
+			if (pass != null) {
+				printPassword(pass);
+			}
 
-            String passwordEncodedString = mappedArgs.get(DB_PASSWORD_ENCODED_PROP_NAME);
-            if (passwordEncodedString != null) {
-                this.dbPasswordEncoded = Boolean.parseBoolean(passwordEncodedString);
-            }
-        }
-        else {
-            if (password != null) {
-                printPassword(password);
-            }
-        }
-    }
+			String passwordEncodedString = mappedArgs.get(DB_PASSWORD_ENCODED_PROP_NAME);
+			if (passwordEncodedString != null) {
+				this.dbPasswordEncoded = Boolean.parseBoolean(passwordEncodedString);
+			}
+		}
+		else {
+			if (password != null) {
+				printPassword(password);
+			}
+		}
+	}
 
-    public boolean isDbPasswordEncoded() {
-        return dbPasswordEncoded;
-    }
+	public boolean isDbPasswordEncoded() {
+		return dbPasswordEncoded;
+	}
 
-    public OSPlatformCrypt getPasswordService() {
-        return passwordService;
-    }
+	public OSPlatformCrypt getPasswordService() {
+		return passwordService;
+	}
 
-    static String getPrintEncodePasswordPropName() {
-        return PRINT_ENCODE_PASSWORD_PROP_NAME;
-    }
+	static String getPrintEncodePasswordPropName() {
+		return PRINT_ENCODE_PASSWORD_PROP_NAME;
+	}
 
-    static String getDbPasswordEncodedPropName() {
-        return DB_PASSWORD_ENCODED_PROP_NAME;
-    }
+	static String getDbPasswordEncodedPropName() {
+		return DB_PASSWORD_ENCODED_PROP_NAME;
+	}
 
-    private void printPassword(String pass) {
-        String messageText = "Encryption for password";
-        String logMessageFormat = messageText + " [{}] : {}";
-        String stringMessageFormat = "%s " + messageText + " [%s] : %s";
-        if (pass != null) {
-            String encrypted = passwordService.encrypt(pass, "");
-            stringSafety.clearString(pass);
-            if (passwordPrintStream == null) {
-                log.debug(logMessageFormat, pass, encrypted);
-            }
-            else {
-                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                passwordPrintStream
-                    .println(String.format(stringMessageFormat, dateFormat.format(new Date()), pass, encrypted));
-            }
-            stringSafety.clearString(pass);
-        }
-    }
+	private void printPassword(String pass) {
+		String messageText = "Encryption for password";
+		String logMessageFormat = messageText + " [{}] : {}";
+		String stringMessageFormat = "%s " + messageText + " [%s] : %s";
+		if (pass != null) {
+			String encrypted = passwordService.encrypt(pass, "");
+			stringSafety.clearString(pass);
+			if (passwordPrintStream == null) {
+				log.debug(logMessageFormat, pass, encrypted);
+			}
+			else {
+				DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				passwordPrintStream
+					.println(String.format(stringMessageFormat, dateFormat.format(new Date()), pass, encrypted));
+			}
+			stringSafety.clearString(pass);
+		}
+	}
 
 }
