@@ -9,6 +9,6 @@ import java.util.List;
  */
 public interface PermissionPathsContainer {
 
-	List<String> getPermissionPaths(Permission permission);
+    List<String> getPermissionPaths(Permission permission);
 
 }

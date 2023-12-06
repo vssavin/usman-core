@@ -8,8 +8,8 @@ package com.github.vssavin.usmancore.exception.user;
  */
 public class UserExpiredException extends RuntimeException {
 
-	public UserExpiredException(String message) {
-		super(message);
-	}
+    public UserExpiredException(String message) {
+        super(message);
+    }
 
 }

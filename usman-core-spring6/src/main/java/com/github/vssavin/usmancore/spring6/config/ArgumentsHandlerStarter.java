@@ -16,16 +16,16 @@ import java.util.List;
 @Configuration
 public class ArgumentsHandlerStarter {
 
-	private final List<AbstractApplicationArgumentsHandler> argumentsHandlerList;
+    private final List<AbstractApplicationArgumentsHandler> argumentsHandlerList;
 
-	@Autowired
-	public ArgumentsHandlerStarter(List<AbstractApplicationArgumentsHandler> argumentsHandlerList) {
-		this.argumentsHandlerList = argumentsHandlerList;
-	}
+    @Autowired
+    public ArgumentsHandlerStarter(List<AbstractApplicationArgumentsHandler> argumentsHandlerList) {
+        this.argumentsHandlerList = argumentsHandlerList;
+    }
 
-	@PostConstruct
-	private void processArgs() {
-		argumentsHandlerList.forEach(AbstractApplicationArgumentsHandler::processArgs);
-	}
+    @PostConstruct
+    private void processArgs() {
+        argumentsHandlerList.forEach(AbstractApplicationArgumentsHandler::processArgs);
+    }
 
 }
