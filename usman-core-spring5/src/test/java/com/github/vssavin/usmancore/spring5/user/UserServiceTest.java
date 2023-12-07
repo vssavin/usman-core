@@ -234,4 +234,5 @@ public class UserServiceTest {
             .singletonList(new SimpleGrantedAuthority(Role.getStringRole(Role.ROLE_USER)));
         return new DefaultOAuth2User(authorities, attributesMap, nameAttributeKey);
     }
+
 }
