@@ -234,45 +234,4 @@ public class UserServiceTest {
             .singletonList(new SimpleGrantedAuthority(Role.getStringRole(Role.ROLE_USER)));
         return new DefaultOAuth2User(authorities, attributesMap, nameAttributeKey);
     }
-
-    // private Predicate userFilterToPredicate(UserFilter userFilter) {
-    // BooleanExpression expression = null;
-    // QUser user = QUser.user;
-    // expression = processAndEqualLong(expression, user.id, userFilter.getUserId());
-    // expression = processAndLikeString(expression, user.email, userFilter.getEmail());
-    // expression = processAndLikeString(expression, user.name, userFilter.getName());
-    // expression = processAndLikeString(expression, user.login, userFilter.getLogin());
-    // return expression;
-    // }
-    //
-    // private BooleanExpression processAndEqualLong(BooleanExpression expression,
-    // SimpleExpression<Long> simpleExpression,
-    // Long value) {
-    // if (value != null) {
-    // if (expression != null) {
-    // expression = expression.and(simpleExpression.eq(value));
-    // }
-    // else {
-    // expression = simpleExpression.eq(value);
-    // }
-    // }
-    //
-    // return expression;
-    // }
-    //
-    // private BooleanExpression processAndLikeString(BooleanExpression expression,
-    // StringExpression stringExpression,
-    // String value) {
-    // if (value != null && !value.isEmpty()) {
-    // if (expression != null) {
-    // expression = expression.and(stringExpression.like(value));
-    // }
-    // else {
-    // expression = stringExpression.like(value);
-    // }
-    // }
-    //
-    // return expression;
-    // }
-
 }
