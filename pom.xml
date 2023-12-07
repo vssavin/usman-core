@@ -110,24 +110,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-jpa</artifactId>
-            <version>4.4.0</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-apt</artifactId>
-            <version>4.4.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.1</version>
@@ -153,7 +135,7 @@
                             <goal>process</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>target/generated-sources</outputDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
                             <processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
                         </configuration>
                     </execution>
