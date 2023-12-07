@@ -30,7 +30,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import java.util.*;
 
 /**
- * @author vssavin on 20.07.2023
+ * @author vssavin on 07.12.2023.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceTest {
