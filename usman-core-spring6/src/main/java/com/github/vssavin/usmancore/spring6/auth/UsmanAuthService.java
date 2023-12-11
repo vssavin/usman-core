@@ -1,40 +1,34 @@
 package com.github.vssavin.usmancore.spring6.auth;
 
 import com.github.vssavin.usmancore.aspect.UsmanRouteDatasource;
+import com.github.vssavin.usmancore.auth.UsmanBaseAuthenticationService;
 import com.github.vssavin.usmancore.config.UsmanConfig;
 import com.github.vssavin.usmancore.config.UsmanConfigurer;
 import com.github.vssavin.usmancore.event.EventType;
 import com.github.vssavin.usmancore.exception.auth.AuthenticationForbiddenException;
 import com.github.vssavin.usmancore.exception.user.UserExpiredException;
 import com.github.vssavin.usmancore.exception.user.UserNotFoundException;
-import com.github.vssavin.usmancore.security.SecureService;
-import com.github.vssavin.usmancore.security.auth.UsmanUsernamePasswordAuthenticationToken;
 import com.github.vssavin.usmancore.spring6.event.EventService;
 import com.github.vssavin.usmancore.spring6.user.User;
 import com.github.vssavin.usmancore.spring6.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AccountExpiredException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 /**
@@ -47,69 +41,20 @@ import java.util.stream.Collectors;
  * @author vssavin on 11.12.2023.
  */
 @Service
-public class UsmanAuthService implements AuthService {
+public class UsmanAuthService extends UsmanBaseAuthenticationService implements AuthService {
 
     private static final Logger log = LoggerFactory.getLogger(UsmanAuthService.class);
-
-    private static final Class<? extends Authentication> authenticationClass = UsmanUsernamePasswordAuthenticationToken.class;
-
-    private static final ConcurrentHashMap<String, Integer> blackList = new ConcurrentHashMap<>(50);
-
-    private static final ConcurrentHashMap<String, Long> banExpirationTime = new ConcurrentHashMap<>(50);
 
     private final UserService userService;
 
     private final EventService eventService;
 
-    private final SecureService secureService;
-
-    private final PasswordEncoder passwordEncoder;
-
-    private final int maxFailureCount;
-
-    private final int blockTimeMinutes;
-
     @Autowired
     public UsmanAuthService(UserService userService, EventService eventService, UsmanConfig usmanConfig,
             UsmanConfigurer usmanConfigurer, PasswordEncoder passwordEncoder) {
+        super(userService, passwordEncoder, usmanConfig.getSecureService(), usmanConfigurer);
         this.userService = userService;
         this.eventService = eventService;
-        this.secureService = usmanConfig.getSecureService();
-        this.passwordEncoder = passwordEncoder;
-        this.maxFailureCount = usmanConfigurer.getMaxAuthFailureCount();
-        this.blockTimeMinutes = usmanConfigurer.getAuthFailureBlockTimeMinutes();
-    }
-
-    @Override
-    public Authentication authenticate(Authentication authentication) {
-        Object credentials = authentication.getCredentials();
-        Object userName = authentication.getPrincipal();
-        if (credentials != null) {
-            UserDetails user = userService.loadUserByUsername(userName.toString());
-            if (user != null) {
-                checkUserDetails(user);
-
-                String addr = getRemoteAddress(authentication);
-                String password = secureService.decrypt(credentials.toString(), secureService.getPrivateKey(addr));
-
-                if (passwordEncoder.matches(password, user.getPassword())) {
-                    List<GrantedAuthority> authorities = new ArrayList<>(user.getAuthorities());
-                    return new UsmanUsernamePasswordAuthenticationToken(authentication.getPrincipal(), password,
-                            authorities);
-                }
-                else {
-                    throw new BadCredentialsException("Authentication failed");
-                }
-
-            }
-            else {
-                return authentication;
-            }
-
-        }
-        else {
-            return authentication;
-        }
     }
 
     @Override
@@ -194,11 +139,6 @@ public class UsmanAuthService implements AuthService {
         }
     }
 
-    @Override
-    public Class<? extends Authentication> authenticationClass() {
-        return authenticationClass;
-    }
-
     private void saveUserEvent(User user, HttpServletRequest request, EventType eventType) {
         String message = "";
         switch (eventType) {
@@ -210,50 +150,6 @@ public class UsmanAuthService implements AuthService {
                 break;
         }
         eventService.createEvent(user, eventType, message);
-    }
-
-    private int getFailureCount(String userIp) {
-        return blackList.getOrDefault(userIp, 1);
-    }
-
-    private void incrementFailureCount(String userIp) {
-        int failureCounts = getFailureCount(userIp) + 1;
-        blackList.put(userIp, failureCounts);
-    }
-
-    private void resetFailureCount(String userIp) {
-        blackList.put(userIp, 1);
-        banExpirationTime.remove(userIp);
-    }
-
-    private long getBanExpirationTime(String userIp) {
-        return banExpirationTime.getOrDefault(userIp, 0L);
-    }
-
-    private void blockIp(String ip) {
-        banExpirationTime.put(ip, Calendar.getInstance().getTimeInMillis() + ((long) blockTimeMinutes * 60 * 1000));
-    }
-
-    private void checkUserDetails(UserDetails userDetails) {
-        if (!userDetails.isAccountNonExpired()) {
-            throw new AccountExpiredException("Account is expired!");
-        }
-        if (!userDetails.isAccountNonLocked()) {
-            throw new LockedException("Account is locked!");
-        }
-        if (!userDetails.isEnabled()) {
-            throw new DisabledException("Account is disabled!");
-        }
-    }
-
-    private String getRemoteAddress(Authentication authentication) {
-        Object details = authentication.getDetails();
-
-        if (details instanceof WebAuthenticationDetails) {
-            return ((WebAuthenticationDetails) details).getRemoteAddress();
-        }
-
-        return "";
     }
 
 }
