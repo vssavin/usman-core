@@ -12,6 +12,7 @@
         <springframework.version>6.0.10</springframework.version>
         <spring.data.version>3.1.0</spring.data.version>
         <spring.security.version>6.0.5</spring.security.version>
+        <spring.test.version>6.0.10</spring.test.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
