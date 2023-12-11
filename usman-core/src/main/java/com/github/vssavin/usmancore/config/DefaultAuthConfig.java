@@ -27,9 +27,9 @@ public class DefaultAuthConfig {
 
     @Autowired
     public DefaultAuthConfig(AuthenticationSuccessHandler customAuthenticationSuccessHandler,
-                             AuthenticationFailureHandler customAuthenticationFailureHandler,
-                             OAuth2UserService<OAuth2UserRequest, OAuth2User> customOAuth2UserService,
-                             LogoutSuccessHandler customLogoutSuccessHandler) {
+            AuthenticationFailureHandler customAuthenticationFailureHandler,
+            OAuth2UserService<OAuth2UserRequest, OAuth2User> customOAuth2UserService,
+            LogoutSuccessHandler customLogoutSuccessHandler) {
         this.authSuccessHandler = customAuthenticationSuccessHandler;
         this.authFailureHandler = customAuthenticationFailureHandler;
         this.oAuth2UserService = customOAuth2UserService;
