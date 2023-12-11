@@ -1,6 +1,7 @@
 package com.github.vssavin.usmancore.spring6.user;
 
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +14,8 @@ import java.util.List;
  * @author vssavin on 06.12.2023.
  */
 @Repository
-public interface UserRepository extends PagingAndSortingRepository<User, Long>, QuerydslPredicateExecutor<User> {
+public interface UserRepository
+        extends PagingAndSortingRepository<User, Long>, QuerydslPredicateExecutor<User>, CrudRepository<User, Long> {
 
     List<User> findByLogin(String login);
 
