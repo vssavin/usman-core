@@ -27,7 +27,7 @@ class UsmanRoutingDatasourceAspect {
         this.dataSourceSwitcher = dataSourceSwitcher;
     }
 
-    @Around("@annotation(UmRouteDatasource)")
+    @Around("@annotation(UsmanRouteDatasource)")
     public Object routeDatasource(ProceedingJoinPoint joinPoint) throws Throwable {
         Object result;
         dataSourceSwitcher.switchToUmDataSource();
