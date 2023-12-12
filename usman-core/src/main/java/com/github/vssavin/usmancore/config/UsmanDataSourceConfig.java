@@ -32,7 +32,7 @@ public class UsmanDataSourceConfig {
     }
 
     @Bean
-    protected DataSource umDataSource() {
+    protected DataSource usmanDataSource() {
         if (this.umDataSource != null) {
             return this.umDataSource;
         }
