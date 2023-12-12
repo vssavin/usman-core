@@ -15,16 +15,16 @@ public class EmailConfig {
 
     public static final String NAME_PREFIX = "mail";
 
-    @Value("${" + NAME_PREFIX + ".host}")
+    @Value("${" + NAME_PREFIX + ".host:}")
     private String host;
 
-    @Value("${" + NAME_PREFIX + ".port}")
+    @Value("${" + NAME_PREFIX + ".port:587}")
     private int port;
 
-    @Value("${" + NAME_PREFIX + ".userName}")
+    @Value("${" + NAME_PREFIX + ".userName:}")
     private String userName;
 
-    @Value("${" + NAME_PREFIX + ".password}")
+    @Value("${" + NAME_PREFIX + ".password:}")
     private String password;
 
     @Value("${" + NAME_PREFIX + ".protocol:smtp}")
