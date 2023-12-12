@@ -56,8 +56,8 @@ public class DefaultSecurityConfig {
 
     @Autowired
     public DefaultSecurityConfig(UserService userService, DefaultAuthConfig defaultAuthConfig,
-                                 OAuth2Config oAuth2Config, UserRememberMeTokenRepository rememberMeTokenRepository,
-                                 UserCsrfTokenRepository csrfTokenRepository) {
+            OAuth2Config oAuth2Config, UserRememberMeTokenRepository rememberMeTokenRepository,
+            UserCsrfTokenRepository csrfTokenRepository) {
         this.userService = userService;
         this.authSuccessHandler = defaultAuthConfig.getAuthSuccessHandler();
         this.authFailureHandler = defaultAuthConfig.getAuthFailureHandler();
