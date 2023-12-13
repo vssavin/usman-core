@@ -23,7 +23,7 @@ public class DefaultBeansConfig {
     @Bean
     public SqlScriptExecutor sqlScriptExecutor(DataSource usmanDataSource) {
         SqlScriptExecutor sqlScriptExecutor = new SqlScriptExecutor(usmanDataSource);
-        List<String> scriptsList = Collections.singletonList("/init.sql");
+        List<String> scriptsList = Collections.singletonList("init.sql");
         sqlScriptExecutor.executeSqlScriptsFromResource(scriptsList, "");
         return sqlScriptExecutor;
     }
