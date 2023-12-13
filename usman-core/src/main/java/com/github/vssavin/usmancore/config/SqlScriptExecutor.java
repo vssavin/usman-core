@@ -140,7 +140,7 @@ public class SqlScriptExecutor {
     }
 
     private Path getResourcePath(String resourcePath) throws URISyntaxException, IOException {
-        URL url = getClass().getResource("/resources" + resourcePath);
+        URL url = getClass().getResource(resourcePath);
         if (url == null) {
             throw new IllegalArgumentException("Resource " + resourcePath + " nor found!");
         }
