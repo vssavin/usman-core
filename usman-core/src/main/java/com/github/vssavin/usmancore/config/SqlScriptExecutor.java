@@ -148,7 +148,7 @@ public class SqlScriptExecutor {
         Path path;
         if (uri.getScheme().equals("jar")) {
             try (FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
-                path = fs.getPath("/resources" + resourcePath);
+                path = fs.getPath(resourcePath);
             }
 
         }
