@@ -237,7 +237,7 @@
                             </sourceDirectories>
                             <excludes>
                                 **/com/github/vssavin/usmancore/**/User.java,
-                                **/com/github/vssavin/usmancore/Launcher.java
+                                **/com/github/vssavin/usmancore/**/Launcher.java
                             </excludes>
                         </configuration>
                     </execution>
