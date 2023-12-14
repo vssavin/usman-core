@@ -14,6 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -70,13 +71,11 @@ public class DefaultSecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder,
-            AuthenticationProvider customAuthenticationProvider) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class)
-            .userDetailsService(userService)
-            .passwordEncoder(passwordEncoder)
-            .and()
-            .authenticationProvider(customAuthenticationProvider)
-            .build();
+            AuthenticationProvider usmanAuthenticationProvider) throws Exception {
+        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        builder.userDetailsService(userService).passwordEncoder(passwordEncoder);
+        builder.authenticationProvider(usmanAuthenticationProvider);
+        return builder.build();
     }
 
     @Bean
@@ -85,19 +84,15 @@ public class DefaultSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, UsmanConfig usmanConfig,
+    public SecurityFilterChain filterChain(HttpSecurity security, UsmanConfig usmanConfig,
             UsmanUrlsConfigurer urlsConfigurer, UsmanBlackListFilter blackListFilter) throws Exception {
 
-        http.addFilterBefore(blackListFilter, BasicAuthenticationFilter.class);
+        security.addFilterBefore(blackListFilter, BasicAuthenticationFilter.class);
 
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+        security.sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.ALWAYS));
 
         List<AuthorizedUrlPermission> urlPermissions = usmanConfig.getAuthorizedUrlPermissions();
-
-        AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry registry = registerUrls(
-                http, urlPermissions);
-
-        HttpSecurity security = registry.and();
+        registerUrls(security, urlPermissions);
 
         String secretKey = UUID.randomUUID().toString();
 
@@ -108,30 +103,28 @@ public class DefaultSecurityConfig {
         Authenticator authenticator = (Authenticator) rememberMeServices;
 
         if (!usmanConfig.isCsrfEnabled()) {
-            security.csrf().disable();
+            security.csrf(AbstractHttpConfigurer::disable);
         }
         else {
             UmCsrfTokenRepository umCsrfTokenRepository = new UmCsrfTokenRepository(authenticator, csrfTokenRepository,
                     rememberMeTokenRepository);
             umCsrfTokenRepository.setUseCache(true);
-            security.csrf().csrfTokenRepository(umCsrfTokenRepository).and();
+            security.csrf(configurer -> configurer.csrfTokenRepository(umCsrfTokenRepository));
         }
 
-        security.formLogin()
-            .failureHandler(authFailureHandler)
+        security.formLogin(configurer -> configurer.failureHandler(authFailureHandler)
             .successHandler(authSuccessHandler)
             .loginPage(urlsConfigurer.getLoginUrl())
             .loginProcessingUrl(urlsConfigurer.getLoginProcessingUrl())
             .usernameParameter("username")
-            .passwordParameter("password")
-            .and()
-            .logout()
-            .permitAll()
+            .passwordParameter("password"));
+
+        security.logout(configurer -> configurer.permitAll()
             .logoutUrl(urlsConfigurer.getLogoutUrl())
             .logoutSuccessHandler(logoutSuccessHandler)
-            .invalidateHttpSession(true);
+            .invalidateHttpSession(true));
 
-        security.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        security.sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         security.rememberMe(customizer -> customizer.userDetailsService(userService)
             .rememberMeServices(rememberMeServices)
@@ -139,41 +132,34 @@ public class DefaultSecurityConfig {
             .alwaysRemember(true));
 
         if (!Objects.equals(oAuth2Config.getGoogleClientId(), "")) {
-            registry.and()
-                .oauth2Login()
-                .successHandler(authSuccessHandler)
+            security.oauth2Login(configurer -> configurer.successHandler(authSuccessHandler)
                 .failureHandler(authFailureHandler)
                 .loginPage(urlsConfigurer.getLoginUrl())
-                .userInfoEndpoint()
-                .userService(customOAuth2UserService);
+                .userInfoEndpoint(userInfoConfigurer -> userInfoConfigurer.userService(customOAuth2UserService)));
         }
 
-        return http.build();
+        return security.build();
     }
 
-    private AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry registerUrls(
-            HttpSecurity http, List<AuthorizedUrlPermission> urlPermissions) throws Exception {
-
-        AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry registry = http
-            .authorizeHttpRequests();
+    private void registerUrls(HttpSecurity http, List<AuthorizedUrlPermission> urlPermissions) throws Exception {
 
         List<AuthorizedUrlPermission> permissions = new ArrayList<>(urlPermissions);
         permissions.sort(Comparator.comparingInt(o -> o.getRoles().length));
 
-        for (AuthorizedUrlPermission urlPermission : permissions) {
-            String[] roles = urlPermission.getRoles();
-            AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl authorizedUrl = registry
-                .requestMatchers(new AntPathRequestMatcher(urlPermission.getUrl(), urlPermission.getHttpMethod()));
+        http.authorizeHttpRequests(configurer -> {
+            for (AuthorizedUrlPermission urlPermission : permissions) {
+                String[] roles = urlPermission.getRoles();
+                AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl authorizedUrl = configurer
+                    .requestMatchers(new AntPathRequestMatcher(urlPermission.getUrl(), urlPermission.getHttpMethod()));
 
-            if (roles != null && roles.length == 0) {
-                registry = authorizedUrl.permitAll();
+                if (roles != null && roles.length == 0) {
+                    configurer = authorizedUrl.permitAll();
+                }
+                else if (roles != null) {
+                    configurer = authorizedUrl.hasAnyRole(urlPermission.getRoles());
+                }
             }
-            else if (roles != null) {
-                registry = authorizedUrl.hasAnyRole(urlPermission.getRoles());
-            }
-        }
-
-        return registry;
+        });
     }
 
 }
