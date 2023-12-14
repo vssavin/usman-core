@@ -69,13 +69,13 @@ public class DefaultSecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder,
-            AuthenticationProvider customAuthenticationProvider) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class)
+    public AuthenticationManager authenticationManager(HttpSecurity httpSecurity, PasswordEncoder passwordEncoder,
+            AuthenticationProvider usmanAuthenticationProvider) throws Exception {
+        return httpSecurity.getSharedObject(AuthenticationManagerBuilder.class)
             .userDetailsService(userService)
             .passwordEncoder(passwordEncoder)
             .and()
-            .authenticationProvider(customAuthenticationProvider)
+            .authenticationProvider(usmanAuthenticationProvider)
             .build();
     }
 
@@ -85,17 +85,17 @@ public class DefaultSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, UsmanConfig usmanConfig,
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, UsmanConfig usmanConfig,
             UsmanUrlsConfigurer urlsConfigurer, UsmanBlackListFilter blackListFilter) throws Exception {
 
-        http.addFilterBefore(blackListFilter, BasicAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(blackListFilter, BasicAuthenticationFilter.class);
 
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+        httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
 
         List<AuthorizedUrlPermission> urlPermissions = usmanConfig.getAuthorizedUrlPermissions();
 
         AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry registry = registerUrls(
-                http, urlPermissions);
+                httpSecurity, urlPermissions);
 
         HttpSecurity security = registry.and();
 
@@ -148,7 +148,7 @@ public class DefaultSecurityConfig {
                 .userService(customOAuth2UserService);
         }
 
-        return http.build();
+        return httpSecurity.build();
     }
 
     private AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry registerUrls(
