@@ -32,6 +32,8 @@ public class SqlScriptExecutor {
 
     private static final String SEARCHING_SQL_FILES_ERROR_MESSAGE = "Searching sql files error! ";
 
+    private static final String RESOURCE_NOT_FOUND_MESSAGE_FORMAT = "Resource %s not found!";
+
     private final DataSource dataSource;
 
     public SqlScriptExecutor(DataSource dataSource) {
@@ -40,8 +42,21 @@ public class SqlScriptExecutor {
 
     public void executeSqlScriptsFromResource(List<String> scriptsList, String resourcePath) {
         Path path;
+        FileSystem fileSystem = null;
         try {
-            path = getResourcePath(resourcePath);
+            URL url = getClass().getResource(resourcePath);
+            if (url == null) {
+                throw new IllegalArgumentException(String.format(RESOURCE_NOT_FOUND_MESSAGE_FORMAT, resourcePath));
+            }
+            URI uri = url.toURI();
+
+            if (uri.getScheme().equals("jar")) {
+                fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+                path = fileSystem.getPath(resourcePath);
+            }
+            else {
+                path = getResourcePath(resourcePath);
+            }
         }
         catch (URISyntaxException | IOException e) {
             throw new IllegalStateException("Executing scripts from resource error!", e);
@@ -60,6 +75,15 @@ public class SqlScriptExecutor {
         }
         catch (Exception e) {
             log.error(SEARCHING_SQL_FILES_ERROR_MESSAGE, e);
+        }
+
+        if (fileSystem != null) {
+            try {
+                fileSystem.close();
+            }
+            catch (IOException e) {
+                log.error("Closing filesystem error!", e);
+            }
         }
     }
 
@@ -82,8 +106,21 @@ public class SqlScriptExecutor {
 
     public void executeAllSqlScriptsFromResource(String resourcePath) {
         Path path;
+        FileSystem fileSystem = null;
         try {
-            path = getResourcePath(resourcePath);
+            URL url = getClass().getResource(resourcePath);
+            if (url == null) {
+                throw new IllegalArgumentException(String.format(RESOURCE_NOT_FOUND_MESSAGE_FORMAT, resourcePath));
+            }
+            URI uri = url.toURI();
+
+            if (uri.getScheme().equals("jar")) {
+                fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+                path = fileSystem.getPath(resourcePath);
+            }
+            else {
+                path = getResourcePath(resourcePath);
+            }
         }
         catch (URISyntaxException | IOException e) {
             throw new IllegalStateException("Executing scripts from resource error!", e);
@@ -101,6 +138,15 @@ public class SqlScriptExecutor {
         }
         catch (Exception e) {
             log.error(SEARCHING_SQL_FILES_ERROR_MESSAGE, e);
+        }
+
+        if (fileSystem != null) {
+            try {
+                fileSystem.close();
+            }
+            catch (IOException e) {
+                log.error("Closing filesystem error!", e);
+            }
         }
     }
 
@@ -128,15 +174,20 @@ public class SqlScriptExecutor {
             catch (FileNotFoundException e) {
                 // ignore because file is definitely exists if Files.walk(...) used
             }
+            catch (UnsupportedOperationException e) {
+                try {
+                    return Files.newBufferedReader(filePath);
+                }
+                catch (IOException ex) {
+                    return null;
+                }
+            }
             return null;
         });
     }
 
     private Stream<Path> filterSqlFilesStream(Stream<Path> paths) {
-        return paths.map(Path::toFile)
-            .filter(File::isFile)
-            .filter(file -> file.getName().endsWith(".sql"))
-            .map(File::toPath);
+        return paths.filter(path -> Files.isRegularFile(path) && path.toString().endsWith(".sql"));
     }
 
     private Path getResourcePath(String resourcePath) throws URISyntaxException, IOException {
