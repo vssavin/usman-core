@@ -37,10 +37,12 @@ public class UsmanConfig {
 
     private final List<PermissionPathsContainer> permissionPathsContainerList;
 
+    private final boolean googleAuthAllowed;
+
     @Autowired
     public UsmanConfig(UsmanConfigurer usmanConfigurer, UsmanUrlsConfigurer usmanUrlsConfigurer,
             UsmanSecureServiceArgumentsHandler umSecureServiceArgumentsHandler,
-            List<PermissionPathsContainer> permissionPathsContainerList) {
+            List<PermissionPathsContainer> permissionPathsContainerList, OAuth2Config oAuth2Config) {
         this.secureService = umSecureServiceArgumentsHandler.getSecureService();
         log.debug("Using secure service: {}", this.secureService);
         this.usmanConfigurer = usmanConfigurer;
@@ -50,6 +52,7 @@ public class UsmanConfig {
         this.authorizedUrlPermissions.addAll(usmanConfigurer.getPermissions());
         this.adminSuccessUrl = usmanUrlsConfigurer.getAdminSuccessUrl();
         this.successUrl = usmanUrlsConfigurer.getSuccessUrl();
+        this.googleAuthAllowed = !oAuth2Config.getGoogleClientId().isEmpty();
         initDefaultPermissions();
         updateAuthorizedPermissions();
     }
@@ -89,6 +92,10 @@ public class UsmanConfig {
 
     public boolean isCsrfEnabled() {
         return csrfEnabled;
+    }
+
+    public boolean isGoogleAuthAllowed() {
+        return googleAuthAllowed;
     }
 
     private void updatePermission(String url, Permission permission) {
