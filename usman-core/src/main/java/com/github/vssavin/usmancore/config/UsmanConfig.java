@@ -43,7 +43,13 @@ public class UsmanConfig {
     public UsmanConfig(UsmanConfigurer usmanConfigurer, UsmanUrlsConfigurer usmanUrlsConfigurer,
             UsmanSecureServiceArgumentsHandler umSecureServiceArgumentsHandler,
             List<PermissionPathsContainer> permissionPathsContainerList, OAuth2Config oAuth2Config) {
-        this.secureService = umSecureServiceArgumentsHandler.getSecureService();
+        SecureService argumentsSecureService = umSecureServiceArgumentsHandler.getSecureService();
+        if (argumentsSecureService == null) {
+            this.secureService = usmanConfigurer.getSecureService();
+        }
+        else {
+            this.secureService = argumentsSecureService;
+        }
         log.debug("Using secure service: {}", this.secureService);
         this.usmanConfigurer = usmanConfigurer;
         this.usmanUrlsConfigurer = usmanUrlsConfigurer;
