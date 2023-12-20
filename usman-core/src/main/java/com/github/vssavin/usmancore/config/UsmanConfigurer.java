@@ -16,7 +16,7 @@ public class UsmanConfigurer {
 
     private String applicationUrl = "http://127.0.0.1:8085";
 
-    private SecureService secureService = SecureService.defaultSecureService();
+    private SecureService secureService;
 
     private Pattern passwordPattern;
 
