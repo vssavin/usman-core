@@ -191,6 +191,10 @@ public class UsmanConfigurer {
         }
     }
 
+    void changeSecureService(SecureService secureService) {
+        this.secureService = secureService;
+    }
+
     private Pattern initPasswordPattern(UsmanAuthPasswordConfig passwordConfig) {
         StringBuilder stringPatternBuilder = new StringBuilder("^");
         if (passwordConfig.isAtLeastOneDigit()) {
