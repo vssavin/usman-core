@@ -29,15 +29,19 @@ public class UsmanSecureServiceArgumentsHandler extends AbstractApplicationArgum
 
     private final SecureService defaultSecureService;
 
+    private final UsmanConfigurer usmanConfigurer;
+
     private SecureService secureService;
 
     @Value("${" + SECURE_SERVICE_PROP_NAME + ":#{null}}")
     private String secureServiceName;
 
     @Autowired
-    UsmanSecureServiceArgumentsHandler(ApplicationContext applicationContext, SecureService secureService) {
+    UsmanSecureServiceArgumentsHandler(ApplicationContext applicationContext, UsmanConfigurer usmanConfigurer,
+            SecureService secureService) {
         super(log, applicationContext);
         this.context = applicationContext;
+        this.usmanConfigurer = usmanConfigurer;
         this.defaultSecureService = secureService;
     }
 
@@ -70,7 +74,17 @@ public class UsmanSecureServiceArgumentsHandler extends AbstractApplicationArgum
             }
         }
 
-        initSecureService(secureServiceName);
+        if (this.secureServiceName == null || this.secureServiceName.isEmpty()) {
+            if (usmanConfigurer.getSecureService() == null) {
+                log.warn("Secure service not specified! Using default secure service...");
+                this.secureService = defaultSecureService;
+                usmanConfigurer.changeSecureService(this.secureService);
+            }
+        }
+        else {
+            initSecureService(this.secureServiceName);
+            usmanConfigurer.changeSecureService(this.secureService);
+        }
     }
 
     SecureService getSecureService() {
