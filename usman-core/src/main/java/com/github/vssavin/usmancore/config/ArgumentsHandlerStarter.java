@@ -1,9 +1,9 @@
-package com.github.vssavin.usmancore.spring6.config;
+package com.github.vssavin.usmancore.config;
 
-import com.github.vssavin.usmancore.config.AbstractApplicationArgumentsHandler;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.util.List;
 
@@ -11,10 +11,10 @@ import java.util.List;
  * Ensures that processing of application arguments for each component begins after it is
  * created.
  *
- * @author vssavin on 29.11.2023
+ * @author vssavin on 20.12.2023.
  */
 @Configuration
-public class ArgumentsHandlerStarter {
+public class ArgumentsHandlerStarter implements ApplicationListener<ContextRefreshedEvent> {
 
     private final List<AbstractApplicationArgumentsHandler> argumentsHandlerList;
 
@@ -23,8 +23,8 @@ public class ArgumentsHandlerStarter {
         this.argumentsHandlerList = argumentsHandlerList;
     }
 
-    @PostConstruct
-    private void processArgs() {
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
         argumentsHandlerList.forEach(AbstractApplicationArgumentsHandler::processArgs);
     }
 
