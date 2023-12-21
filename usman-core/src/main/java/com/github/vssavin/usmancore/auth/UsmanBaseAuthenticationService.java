@@ -37,7 +37,7 @@ public class UsmanBaseAuthenticationService implements UsmanBaseAuthenticator {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final SecureService secureService;
+    private SecureService secureService;
 
     protected final int maxFailureCount;
 
@@ -99,6 +99,10 @@ public class UsmanBaseAuthenticationService implements UsmanBaseAuthenticator {
     @Override
     public Class<? extends Authentication> authenticationClass() {
         return authenticationClass;
+    }
+
+    protected void setSecureService(SecureService secureService) {
+        this.secureService = secureService;
     }
 
     private void checkUserDetails(UserDetails userDetails) {
