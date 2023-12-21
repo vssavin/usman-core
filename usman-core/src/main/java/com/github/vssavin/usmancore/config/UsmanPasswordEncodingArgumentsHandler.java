@@ -22,7 +22,7 @@ import java.util.Map;
  * An {@link com.github.vssavin.usmancore.config.AbstractApplicationArgumentsHandler}
  * implementation that processes application arguments to encode password.
  *
- * @author vssavin on 16.09.2023
+ * @author vssavin on 29.11.2023.
  */
 @Configuration
 public class UsmanPasswordEncodingArgumentsHandler extends AbstractApplicationArgumentsHandler {
