@@ -1,6 +1,7 @@
 package com.github.vssavin.usmancore.config;
 
 import com.github.vssavin.usmancore.security.SecureService;
+import org.springframework.http.HttpMethod;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -28,6 +29,10 @@ public class UsmanConfigurer {
 
     private final Map<String, String[]> resourceHandlers = new HashMap<>();
 
+    private final UsmanUrlsConfigurer urlsConfigurer;
+
+    private final List<PermissionPathsContainer> permissionPathsContainerList;
+
     private boolean csrfEnabled = true;
 
     private boolean configured = false;
@@ -37,6 +42,17 @@ public class UsmanConfigurer {
     private int maxAuthFailureCount = 3;
 
     private int authFailureBlockTimeMinutes = 60;
+
+    public UsmanConfigurer() {
+        this.urlsConfigurer = new UsmanUrlsConfigurer();
+        this.permissionPathsContainerList = Collections.emptyList();
+    }
+
+    public UsmanConfigurer(UsmanUrlsConfigurer urlsConfigurer,
+            List<PermissionPathsContainer> permissionPathsContainerList) {
+        this.urlsConfigurer = urlsConfigurer;
+        this.permissionPathsContainerList = permissionPathsContainerList;
+    }
 
     public UsmanConfigurer loginPageTitle(String loginPageTitle) {
         checkAccess();
@@ -115,6 +131,8 @@ public class UsmanConfigurer {
     }
 
     public UsmanConfigurer configure() {
+        initPermissions();
+        configurePermissions();
         this.configured = true;
         return this;
     }
@@ -185,14 +203,73 @@ public class UsmanConfigurer {
                 + authFailureBlockTimeMinutes + '}';
     }
 
+    void changeSecureService(SecureService secureService) {
+        this.secureService = secureService;
+    }
+
     private void checkAccess() {
         if (configured) {
             throw new IllegalStateException("UsmanConfigurer is already configured!");
         }
     }
 
-    void changeSecureService(SecureService secureService) {
-        this.secureService = secureService;
+    private void initPermissions() {
+        permissionPathsContainerList.forEach(container -> {
+            List<AuthorizedUrlPermission> paths = container.getPermissionPaths(Permission.ANY_USER);
+            permissions.addAll(paths);
+            paths = container.getPermissionPaths(Permission.ADMIN_ONLY);
+            permissions.addAll(paths);
+            paths = container.getPermissionPaths(Permission.USER_ADMIN);
+            permissions.addAll(paths);
+        });
+    }
+
+    private void configurePermissions() {
+        if (!isRegistrationAllowed()) {
+            updatePermission(urlsConfigurer.getRegistrationUrl(), Permission.ADMIN_ONLY);
+            updatePermission(urlsConfigurer.getPerformRegisterUrl(), Permission.ADMIN_ONLY);
+            updatePermission(urlsConfigurer.getPerformRegisterUrl(), HttpMethod.POST.name(), Permission.ADMIN_ONLY);
+        }
+    }
+
+    private void updatePermission(String url, Permission permission) {
+        int index = getPermissionIndex(url);
+        String httpMethod = getPermissionHttpMethod(url);
+        if (index != -1) {
+            this.permissions.set(index, new AuthorizedUrlPermission(url, httpMethod, permission));
+        }
+    }
+
+    private void updatePermission(String url, String httpMethod, Permission permission) {
+        int index = getPermissionIndex(url);
+        if (index != -1) {
+            AuthorizedUrlPermission urlPermission = this.permissions.get(index);
+            if (urlPermission != null && urlPermission.getHttpMethod().equals(httpMethod)) {
+                this.permissions.set(index, new AuthorizedUrlPermission(url, httpMethod, permission));
+            }
+            else {
+                this.permissions.add(new AuthorizedUrlPermission(url, httpMethod, permission));
+            }
+        }
+    }
+
+    private int getPermissionIndex(String url) {
+        for (int i = 0; i < this.permissions.size(); i++) {
+            AuthorizedUrlPermission authorizedUrlPermission = this.permissions.get(i);
+            if (authorizedUrlPermission.getUrl().equals(url)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private String getPermissionHttpMethod(String url) {
+        for (AuthorizedUrlPermission authorizedUrlPermission : this.permissions) {
+            if (authorizedUrlPermission.getUrl().equals(url)) {
+                return authorizedUrlPermission.getHttpMethod();
+            }
+        }
+        return AuthorizedUrlPermission.getDefaultHttpMethod();
     }
 
     private Pattern initPasswordPattern(UsmanAuthPasswordConfig passwordConfig) {
