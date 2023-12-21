@@ -16,12 +16,12 @@ import java.util.Map;
  * An {@link com.github.vssavin.usmancore.config.AbstractApplicationArgumentsHandler}
  * implementation that processes application arguments to initialize a secure service.
  *
- * @author vssavin on 16.09.2023
+ * @author vssavin on 29.11.2023.
  */
 @Configuration
 public class UsmanSecureServiceArgumentsHandler extends AbstractApplicationArgumentsHandler {
 
-    private static final String SECURE_SERVICE_PROP_NAME = "um.secureService";
+    private static final String SECURE_SERVICE_PROP_NAME = "usman.secureService";
 
     private static final Logger log = LoggerFactory.getLogger(UsmanSecureServiceArgumentsHandler.class);
 
@@ -47,31 +47,9 @@ public class UsmanSecureServiceArgumentsHandler extends AbstractApplicationArgum
 
     @Override
     public void processArgs() {
-        String[] args = getApplicationArguments();
-        if (args.length > 0) {
-            String argsString = Arrays.toString(args);
-            log.debug("Application started with arguments: {}", argsString);
-            Map<String, String> mappedArgs = getMappedArgs(args);
-
-            String serviceName = mappedArgs.get(SECURE_SERVICE_PROP_NAME);
-
-            if (serviceName != null) {
-                this.secureServiceName = serviceName;
-            }
-        }
-
-        if (this.secureServiceName == null) {
-            String serviceName = System.getProperty(SECURE_SERVICE_PROP_NAME);
-            if (serviceName != null) {
-                this.secureServiceName = serviceName;
-            }
-        }
-
-        if (this.secureServiceName == null) {
-            String serviceName = System.getenv(SECURE_SERVICE_PROP_NAME);
-            if (serviceName != null) {
-                this.secureServiceName = serviceName;
-            }
+        String serviceName = getServiceName();
+        if (!serviceName.isEmpty()) {
+            this.secureServiceName = getServiceName();
         }
 
         if (this.secureServiceName == null || this.secureServiceName.isEmpty()) {
@@ -93,6 +71,27 @@ public class UsmanSecureServiceArgumentsHandler extends AbstractApplicationArgum
 
     static String getSecureServicePropName() {
         return SECURE_SERVICE_PROP_NAME;
+    }
+
+    private String getServiceName() {
+        String serviceName = "";
+        String[] args = getApplicationArguments();
+        if (args.length > 0) {
+            String argsString = Arrays.toString(args);
+            log.debug("Application started with arguments: {}", argsString);
+            Map<String, String> mappedArgs = getMappedArgs(args);
+            serviceName = mappedArgs.get(SECURE_SERVICE_PROP_NAME);
+        }
+
+        if (serviceName == null) {
+            serviceName = System.getProperty(SECURE_SERVICE_PROP_NAME);
+        }
+
+        if (serviceName == null) {
+            serviceName = System.getenv(SECURE_SERVICE_PROP_NAME);
+        }
+
+        return serviceName;
     }
 
     private void initSecureService(String secureServiceName) {
