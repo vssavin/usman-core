@@ -84,14 +84,14 @@ public class DefaultSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity security, UsmanConfig usmanConfig,
+    public SecurityFilterChain filterChain(HttpSecurity security, UsmanConfigurer usmanConfigurer,
             UsmanUrlsConfigurer urlsConfigurer, UsmanBlackListFilter blackListFilter) throws Exception {
 
         security.addFilterBefore(blackListFilter, BasicAuthenticationFilter.class);
 
         security.sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.ALWAYS));
 
-        List<AuthorizedUrlPermission> urlPermissions = usmanConfig.getAuthorizedUrlPermissions();
+        List<AuthorizedUrlPermission> urlPermissions = usmanConfigurer.getPermissions();
         registerUrls(security, urlPermissions);
 
         String secretKey = UUID.randomUUID().toString();
@@ -102,7 +102,7 @@ public class DefaultSecurityConfig {
 
         Authenticator authenticator = (Authenticator) rememberMeServices;
 
-        if (!usmanConfig.isCsrfEnabled()) {
+        if (!usmanConfigurer.isCsrfEnabled()) {
             security.csrf(AbstractHttpConfigurer::disable);
         }
         else {
