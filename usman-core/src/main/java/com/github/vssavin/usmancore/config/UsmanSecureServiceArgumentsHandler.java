@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,6 +32,8 @@ public class UsmanSecureServiceArgumentsHandler extends AbstractApplicationArgum
 
     private final UsmanConfigurer usmanConfigurer;
 
+    private final List<ArgumentsProcessedNotifier> notifiers;
+
     private SecureService secureService;
 
     @Value("${" + SECURE_SERVICE_PROP_NAME + ":#{null}}")
@@ -38,11 +41,12 @@ public class UsmanSecureServiceArgumentsHandler extends AbstractApplicationArgum
 
     @Autowired
     UsmanSecureServiceArgumentsHandler(ApplicationContext applicationContext, UsmanConfigurer usmanConfigurer,
-            SecureService secureService) {
+            SecureService secureService, List<ArgumentsProcessedNotifier> notifiers) {
         super(log, applicationContext);
         this.context = applicationContext;
         this.usmanConfigurer = usmanConfigurer;
         this.defaultSecureService = secureService;
+        this.notifiers = notifiers;
     }
 
     @Override
@@ -63,6 +67,8 @@ public class UsmanSecureServiceArgumentsHandler extends AbstractApplicationArgum
             initSecureService(this.secureServiceName);
             usmanConfigurer.changeSecureService(this.secureService);
         }
+
+        notifiers.forEach(notifier -> notifier.notifyArgumentsProcessed(this.getClass()));
     }
 
     SecureService getSecureService() {
