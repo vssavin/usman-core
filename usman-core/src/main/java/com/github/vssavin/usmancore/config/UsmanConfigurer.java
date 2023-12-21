@@ -31,6 +31,8 @@ public class UsmanConfigurer {
 
     private final UsmanUrlsConfigurer urlsConfigurer;
 
+    private final OAuth2Config oAuth2Config;
+
     private final List<PermissionPathsContainer> permissionPathsContainerList;
 
     private boolean csrfEnabled = true;
@@ -45,12 +47,14 @@ public class UsmanConfigurer {
 
     public UsmanConfigurer() {
         this.urlsConfigurer = new UsmanUrlsConfigurer();
+        this.oAuth2Config = new OAuth2Config();
         this.permissionPathsContainerList = Collections.emptyList();
     }
 
-    public UsmanConfigurer(UsmanUrlsConfigurer urlsConfigurer,
+    public UsmanConfigurer(UsmanUrlsConfigurer urlsConfigurer, OAuth2Config oAuth2Config,
             List<PermissionPathsContainer> permissionPathsContainerList) {
         this.urlsConfigurer = urlsConfigurer;
+        this.oAuth2Config = oAuth2Config;
         this.permissionPathsContainerList = permissionPathsContainerList;
     }
 
@@ -165,6 +169,11 @@ public class UsmanConfigurer {
 
     public List<AuthorizedUrlPermission> getPermissions() {
         return permissions;
+    }
+
+    public boolean isGoogleAuthAllowed() {
+        String clientId = oAuth2Config.getGoogleClientId();
+        return clientId != null && !clientId.isEmpty();
     }
 
     public boolean isRegistrationAllowed() {
