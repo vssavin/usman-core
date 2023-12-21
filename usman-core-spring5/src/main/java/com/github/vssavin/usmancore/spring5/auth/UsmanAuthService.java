@@ -2,8 +2,9 @@ package com.github.vssavin.usmancore.spring5.auth;
 
 import com.github.vssavin.usmancore.aspect.UsmanRouteDatasource;
 import com.github.vssavin.usmancore.auth.UsmanBaseAuthenticationService;
-import com.github.vssavin.usmancore.config.UsmanConfig;
+import com.github.vssavin.usmancore.config.ArgumentsProcessedNotifier;
 import com.github.vssavin.usmancore.config.UsmanConfigurer;
+import com.github.vssavin.usmancore.config.UsmanSecureServiceArgumentsHandler;
 import com.github.vssavin.usmancore.event.EventType;
 import com.github.vssavin.usmancore.exception.auth.AuthenticationForbiddenException;
 import com.github.vssavin.usmancore.exception.user.UserExpiredException;
@@ -39,7 +40,8 @@ import java.util.stream.Collectors;
  * @author vssavin on 11.12.2023.
  */
 @Service
-public class UsmanAuthService extends UsmanBaseAuthenticationService implements AuthService {
+public class UsmanAuthService extends UsmanBaseAuthenticationService
+        implements AuthService, ArgumentsProcessedNotifier {
 
     private static final Logger log = LoggerFactory.getLogger(UsmanAuthService.class);
 
@@ -47,12 +49,15 @@ public class UsmanAuthService extends UsmanBaseAuthenticationService implements 
 
     private final EventService eventService;
 
+    private final UsmanConfigurer usmanConfigurer;
+
     @Autowired
-    public UsmanAuthService(UserService userService, EventService eventService, UsmanConfig usmanConfig,
-            UsmanConfigurer usmanConfigurer, PasswordEncoder passwordEncoder) {
-        super(userService, passwordEncoder, usmanConfig.getSecureService(), usmanConfigurer);
+    public UsmanAuthService(UserService userService, EventService eventService, UsmanConfigurer usmanConfigurer,
+            PasswordEncoder passwordEncoder) {
+        super(userService, passwordEncoder, usmanConfigurer.getSecureService(), usmanConfigurer);
         this.userService = userService;
         this.eventService = eventService;
+        this.usmanConfigurer = usmanConfigurer;
     }
 
     @Override
@@ -134,6 +139,13 @@ public class UsmanAuthService extends UsmanBaseAuthenticationService implements 
         }
         else {
             incrementFailureCount(userIp);
+        }
+    }
+
+    @Override
+    public void notifyArgumentsProcessed(Class<?> aClass) {
+        if (aClass != null && UsmanSecureServiceArgumentsHandler.class.isAssignableFrom(aClass)) {
+            super.setSecureService(usmanConfigurer.getSecureService());
         }
     }
 
