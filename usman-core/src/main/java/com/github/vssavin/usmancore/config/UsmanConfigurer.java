@@ -1,6 +1,8 @@
 package com.github.vssavin.usmancore.config;
 
 import com.github.vssavin.usmancore.security.SecureService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 
 import java.util.*;
@@ -12,6 +14,8 @@ import java.util.regex.Pattern;
  * @author vssavin on 05.12.2023.
  */
 public class UsmanConfigurer {
+
+    private static final Logger log = LoggerFactory.getLogger(UsmanConfigurer.class);
 
     private String loginPageTitle = "";
 
@@ -135,6 +139,7 @@ public class UsmanConfigurer {
     }
 
     public UsmanConfigurer configure() {
+        checkAccess();
         initPermissions();
         configurePermissions();
         this.configured = true;
@@ -150,6 +155,8 @@ public class UsmanConfigurer {
     }
 
     public SecureService getSecureService() {
+        log.trace("SecureService implementation can be changed after application arguments have been processed!"
+                + " You can implement ArgumentsProcessedNotifier interface to receive notification when this happens.");
         return secureService;
     }
 
