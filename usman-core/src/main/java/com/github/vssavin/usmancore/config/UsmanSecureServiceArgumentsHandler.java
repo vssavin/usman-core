@@ -97,6 +97,10 @@ public class UsmanSecureServiceArgumentsHandler extends AbstractApplicationArgum
             serviceName = System.getenv(SECURE_SERVICE_PROP_NAME);
         }
 
+        if (serviceName == null) {
+            serviceName = "";
+        }
+
         return serviceName;
     }
 
