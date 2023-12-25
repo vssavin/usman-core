@@ -149,7 +149,9 @@ public class UmCsrfTokenRepository implements CsrfTokenRepository {
 
         if (useCache) {
             if (rememberMeToken != null) {
-                csrfCache.put(user.getId(), Collections.singletonList(userCsrfToken));
+                List<UserCsrfToken> list = new ArrayList<>();
+                list.add(userCsrfToken);
+                csrfCache.put(user.getId(), list);
             }
         }
         else {
