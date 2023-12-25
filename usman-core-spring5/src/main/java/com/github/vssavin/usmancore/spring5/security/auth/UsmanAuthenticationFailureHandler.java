@@ -1,5 +1,6 @@
 package com.github.vssavin.usmancore.spring5.security.auth;
 
+import com.github.vssavin.usmancore.config.UsmanUrlsConfigurer;
 import com.github.vssavin.usmancore.exception.auth.AuthenticationForbiddenException;
 import com.github.vssavin.usmancore.spring5.auth.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +23,14 @@ import java.io.IOException;
 @Component
 class UsmanAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    private static final String FAILURE_REDIRECT_PAGE = "/login.html?error=true";
+    private final String failureRedirectUrl;
 
     private final AuthService authService;
 
     @Autowired
-    UsmanAuthenticationFailureHandler(AuthService authService) {
+    UsmanAuthenticationFailureHandler(AuthService authService, UsmanUrlsConfigurer usmanUrlsConfigurer) {
         this.authService = authService;
+        this.failureRedirectUrl = usmanUrlsConfigurer.getLoginUrl() + "?error=true";
     }
 
     @Override
@@ -51,7 +53,7 @@ class UsmanAuthenticationFailureHandler implements AuthenticationFailureHandler 
             return;
         }
 
-        response.sendRedirect(FAILURE_REDIRECT_PAGE + lang);
+        response.sendRedirect(failureRedirectUrl + lang);
 
     }
 
