@@ -1,6 +1,7 @@
 package com.github.vssavin.usmancore.spring6.event;
 
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
@@ -14,7 +15,8 @@ import java.util.List;
  * @author vssavin on 07.12.2023.
  */
 @Repository
-public interface EventRepository extends PagingAndSortingRepository<Event, Long>, QuerydslPredicateExecutor<Event> {
+public interface EventRepository
+        extends PagingAndSortingRepository<Event, Long>, QuerydslPredicateExecutor<Event>, CrudRepository<Event, Long> {
 
     @Transactional
     @NonNull
