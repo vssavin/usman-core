@@ -89,8 +89,6 @@ public class DefaultSecurityConfig {
 
         security.addFilterBefore(blackListFilter, BasicAuthenticationFilter.class);
 
-        security.sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.ALWAYS));
-
         List<AuthorizedUrlPermission> urlPermissions = usmanConfigurer.getPermissions();
         registerUrls(security, urlPermissions);
 
