@@ -64,12 +64,12 @@ public class UsmanDataSourceConfig {
     @Bean
     AbstractRoutingDataSource routingDatasource(
             @Autowired(required = false) @Qualifier("appDatasource") DataSource appDatasource,
-            @Autowired DataSource usmanDataSource) {
+            @Autowired @Qualifier("usmanDatasource") DataSource usmanDatasource) {
         RoutingDataSource routingDataSource = new RoutingDataSource();
-        routingDataSource.addDataSource(RoutingDataSource.DATASOURCE_TYPE.UM_DATASOURCE, usmanDataSource);
+        routingDataSource.addDataSource(RoutingDataSource.DATASOURCE_TYPE.UM_DATASOURCE, usmanDatasource);
         if (appDatasource == null) {
             routingDataSource.setKey(RoutingDataSource.DATASOURCE_TYPE.UM_DATASOURCE);
-            routingDataSource.setDefaultTargetDataSource(usmanDataSource);
+            routingDataSource.setDefaultTargetDataSource(usmanDatasource);
         }
         else {
             routingDataSource.addDataSource(RoutingDataSource.DATASOURCE_TYPE.APPLICATION_DATASOURCE, appDatasource);
