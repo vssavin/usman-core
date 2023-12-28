@@ -10,7 +10,8 @@ import org.springframework.context.annotation.PropertySource;
  * @author vssavin on 28.11.2023.
  */
 @Configuration
-@PropertySource(value = "classpath:" + UsmanDatabaseConfig.CONFIG_FILE)
+@PropertySource(value = { "file:./" + UsmanDatabaseConfig.CONFIG_FILE, "file:../" + UsmanDatabaseConfig.CONFIG_FILE,
+        "classpath:" + UsmanDatabaseConfig.CONFIG_FILE }, ignoreResourceNotFound = true)
 public class UsmanDatabaseConfig {
 
     static final String CONFIG_FILE = "usman_db_conf.properties";
