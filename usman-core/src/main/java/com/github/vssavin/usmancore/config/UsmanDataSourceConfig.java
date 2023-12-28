@@ -9,6 +9,8 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
 import javax.sql.DataSource;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Configuration of user management data sources.
@@ -51,6 +53,10 @@ public class UsmanDataSourceConfig {
             log.error("Creating datasource error: ", e);
         }
         this.umDataSource = dataSource;
+
+        SqlScriptExecutor sqlScriptExecutor = new SqlScriptExecutor(umDataSource);
+        List<String> script = Collections.singletonList("init.sql");
+        sqlScriptExecutor.executeSqlScriptsFromResource(UsmanDataSourceConfig.class, script, "");
 
         return dataSource;
     }
