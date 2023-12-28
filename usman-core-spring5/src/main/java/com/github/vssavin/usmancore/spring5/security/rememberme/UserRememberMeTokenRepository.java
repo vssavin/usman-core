@@ -17,4 +17,8 @@ public interface UserRememberMeTokenRepository extends CrudRepository<UserRememb
     @UsmanRouteDatasource
     List<UserRememberMeToken> findByUserId(Long userId);
 
+    @UsmanRouteDatasource
+    @Override
+    UserRememberMeToken save(UserRememberMeToken entity);
+
 }
