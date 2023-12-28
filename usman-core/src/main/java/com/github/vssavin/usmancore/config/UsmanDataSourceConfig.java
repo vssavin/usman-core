@@ -25,7 +25,7 @@ public class UsmanDataSourceConfig {
 
     private final UsmanPasswordEncodingArgumentsHandler argumentsHandler;
 
-    private DataSource umDataSource;
+    private DataSource usmanDatasource;
 
     public UsmanDataSourceConfig(UsmanDatabaseConfig usmanDatabaseConfig,
             UsmanPasswordEncodingArgumentsHandler argumentsHandler) {
@@ -34,9 +34,9 @@ public class UsmanDataSourceConfig {
     }
 
     @Bean
-    protected DataSource usmanDataSource() {
-        if (this.umDataSource != null) {
-            return this.umDataSource;
+    protected DataSource usmanDatasource() {
+        if (this.usmanDatasource != null) {
+            return this.usmanDatasource;
         }
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         try {
@@ -52,9 +52,9 @@ public class UsmanDataSourceConfig {
         catch (Exception e) {
             log.error("Creating datasource error: ", e);
         }
-        this.umDataSource = dataSource;
+        this.usmanDatasource = dataSource;
 
-        SqlScriptExecutor sqlScriptExecutor = new SqlScriptExecutor(umDataSource);
+        SqlScriptExecutor sqlScriptExecutor = new SqlScriptExecutor(usmanDatasource);
         List<String> script = Collections.singletonList("init.sql");
         sqlScriptExecutor.executeSqlScriptsFromResource(UsmanDataSourceConfig.class, script, "");
 
