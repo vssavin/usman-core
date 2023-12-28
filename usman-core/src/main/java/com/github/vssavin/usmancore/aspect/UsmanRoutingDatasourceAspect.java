@@ -4,6 +4,8 @@ import com.github.vssavin.usmancore.config.DataSourceSwitcher;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -20,6 +22,8 @@ import org.springframework.stereotype.Component;
 @Component
 class UsmanRoutingDatasourceAspect {
 
+    private static final Logger log = LoggerFactory.getLogger(UsmanRoutingDatasourceAspect.class);
+
     private final DataSourceSwitcher dataSourceSwitcher;
 
     @Autowired
@@ -29,6 +33,7 @@ class UsmanRoutingDatasourceAspect {
 
     @Around("@annotation(UsmanRouteDatasource)")
     public Object routeDatasource(ProceedingJoinPoint joinPoint) throws Throwable {
+        log.debug("Switching to usman database...");
         Object result;
         dataSourceSwitcher.switchToUmDataSource();
         try {
@@ -36,6 +41,7 @@ class UsmanRoutingDatasourceAspect {
         }
         finally {
             dataSourceSwitcher.switchToPreviousDataSource();
+            log.debug("Switching back from usman database...");
         }
 
         return result;
