@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
  * @author vssavin on 08.12.2023.
  */
 @Component
-@PropertySource(value = "file:./mail.properties", ignoreResourceNotFound = true)
+@PropertySource(value = { "file:./mail.properties", "file:../mail.properties", "classpath: application.properties",
+        "classpath: application.yml" }, ignoreResourceNotFound = true)
 public class EmailConfig {
 
     public static final String NAME_PREFIX = "mail";
