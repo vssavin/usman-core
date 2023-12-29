@@ -102,6 +102,7 @@ public class DefaultSecurityConfig {
         AbstractRememberMeServices rememberMeServices = new RefreshOnLoginDatabaseTokenBasedRememberMeService(secretKey,
                 userService, rememberMeTokenRepository);
         rememberMeServices.setAlwaysRemember(true);
+        rememberMeServices.setTokenValiditySeconds(usmanConfigurer.getRememberMeTokenValiditySeconds());
 
         Authenticator authenticator = (Authenticator) rememberMeServices;
 
@@ -111,8 +112,9 @@ public class DefaultSecurityConfig {
         else {
             UmCsrfTokenRepository umCsrfTokenRepository = new UmCsrfTokenRepository(authenticator, csrfTokenRepository,
                     rememberMeTokenRepository);
+            umCsrfTokenRepository.setTokenValiditySeconds(usmanConfigurer.getCsrfTokenValiditySeconds());
             umCsrfTokenRepository.setUseCache(true);
-            security.csrf().csrfTokenRepository(umCsrfTokenRepository).and();
+            security.csrf().csrfTokenRepository(umCsrfTokenRepository);
         }
 
         security.formLogin()
