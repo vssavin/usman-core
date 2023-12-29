@@ -17,6 +17,8 @@ public class UsmanConfigurer {
 
     private static final Logger log = LoggerFactory.getLogger(UsmanConfigurer.class);
 
+    private static final int TWO_WEEKS_S = 1209600;
+
     private String loginPageTitle = "";
 
     private String applicationUrl = "http://127.0.0.1:8085";
@@ -48,6 +50,10 @@ public class UsmanConfigurer {
     private int maxAuthFailureCount = 3;
 
     private int authFailureBlockTimeMinutes = 60;
+
+    private int rememberMeTokenValiditySeconds = TWO_WEEKS_S;
+
+    private int csrfTokenValiditySeconds = TWO_WEEKS_S;
 
     public UsmanConfigurer() {
         this.urlsConfigurer = new UsmanUrlsConfigurer();
@@ -122,6 +128,18 @@ public class UsmanConfigurer {
         return this;
     }
 
+    public UsmanConfigurer rememberMeTokenValiditySeconds(int rememberMeTokenValiditySeconds) {
+        checkAccess();
+        this.rememberMeTokenValiditySeconds = rememberMeTokenValiditySeconds;
+        return this;
+    }
+
+    public UsmanConfigurer csrfTokenValiditySeconds(int csrfTokenValiditySeconds) {
+        checkAccess();
+        this.csrfTokenValiditySeconds = csrfTokenValiditySeconds;
+        return this;
+    }
+
     public UsmanConfigurer resourceHandlers(Map<String, String[]> resourceHandlers) {
         checkAccess();
         resourceHandlers.forEach((handler, locations) -> {
@@ -193,6 +211,14 @@ public class UsmanConfigurer {
 
     public int getAuthFailureBlockTimeMinutes() {
         return authFailureBlockTimeMinutes;
+    }
+
+    public int getRememberMeTokenValiditySeconds() {
+        return rememberMeTokenValiditySeconds;
+    }
+
+    public int getCsrfTokenValiditySeconds() {
+        return csrfTokenValiditySeconds;
     }
 
     public UsmanAuthPasswordConfig passwordConfig() {
