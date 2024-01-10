@@ -14,7 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -93,7 +93,7 @@ public class DefaultSecurityConfig {
 
         List<AuthorizedUrlPermission> urlPermissions = usmanConfigurer.getPermissions();
 
-        AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry registry = registerUrls(
+        ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry = registerUrls(
                 httpSecurity, urlPermissions);
 
         HttpSecurity security = registry.and();
@@ -157,18 +157,18 @@ public class DefaultSecurityConfig {
         return new AntPathRequestMatcher(url, "POST");
     }
 
-    private AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry registerUrls(
+    private ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registerUrls(
             HttpSecurity http, List<AuthorizedUrlPermission> urlPermissions) throws Exception {
 
-        AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry registry = http
-            .authorizeHttpRequests();
+        ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry = http
+            .authorizeRequests();
 
         List<AuthorizedUrlPermission> permissions = new ArrayList<>(urlPermissions);
         permissions.sort(Comparator.comparingInt(o -> o.getRoles().length));
 
         for (AuthorizedUrlPermission urlPermission : permissions) {
             String[] roles = urlPermission.getRoles();
-            AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl authorizedUrl = registry
+            ExpressionUrlAuthorizationConfigurer<HttpSecurity>.AuthorizedUrl authorizedUrl = registry
                 .requestMatchers(new AntPathRequestMatcher(urlPermission.getUrl(), urlPermission.getHttpMethod()));
 
             if (roles != null && roles.length == 0) {
