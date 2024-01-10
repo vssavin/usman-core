@@ -28,6 +28,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.authentication.rememberme.AbstractRememberMeServices;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.util.*;
 
@@ -128,6 +129,7 @@ public class DefaultSecurityConfig {
             .logout()
             .permitAll()
             .logoutUrl(urlsConfigurer.getLogoutUrl())
+            .logoutRequestMatcher(createLogoutRequestMatcher(urlsConfigurer.getLogoutUrl()))
             .logoutSuccessHandler(logoutSuccessHandler)
             .invalidateHttpSession(true);
 
@@ -149,6 +151,10 @@ public class DefaultSecurityConfig {
         }
 
         return httpSecurity.build();
+    }
+
+    private RequestMatcher createLogoutRequestMatcher(String url) {
+        return new AntPathRequestMatcher(url, "POST");
     }
 
     private AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry registerUrls(
