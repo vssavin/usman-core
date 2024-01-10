@@ -4,7 +4,7 @@
 
     <groupId>com.github.vssavin.usman-core</groupId>
     <artifactId>usman-core-spring6</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.2</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -21,14 +21,14 @@
     <parent>
         <groupId>com.github.vssavin</groupId>
         <artifactId>usman-core-parent</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.2</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>com.github.vssavin.usman-core</groupId>
             <artifactId>usman-core</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>0.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.openjdk.nashorn</groupId>
