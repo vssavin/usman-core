@@ -41,10 +41,13 @@ public class EventService {
         this.eventMapper = eventMapper;
     }
 
+    @Transactional
+    @UsmanRouteDatasource
     public EventDto createEvent(User user, EventType eventType, String eventMessage) {
         try {
             Event event = new Event(user.getId(), eventType, new Timestamp(System.currentTimeMillis()), eventMessage,
                     user);
+            event = eventRepository.save(event);
             user.getEvents().add(event);
             return eventMapper.toDto(event);
         }
