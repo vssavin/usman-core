@@ -1,5 +1,6 @@
 package com.github.vssavin.usmancore.spring6.security.rememberme;
 
+import com.github.vssavin.usmancore.spring6.user.User;
 import jakarta.persistence.*;
 
 /**
@@ -21,6 +22,10 @@ public class UserRememberMeToken {
     @Column(name = "token")
     private String token;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;
+
     public UserRememberMeToken(Long userId, String token) {
         this.userId = userId;
         this.token = token;
@@ -41,6 +46,10 @@ public class UserRememberMeToken {
         return token;
     }
 
+    public User getUser() {
+        return user;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -51,6 +60,10 @@ public class UserRememberMeToken {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @Override

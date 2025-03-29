@@ -12,6 +12,7 @@ import com.github.vssavin.usmancore.exception.user.UserNotFoundException;
 import com.github.vssavin.usmancore.spring6.event.EventService;
 import com.github.vssavin.usmancore.spring6.user.User;
 import com.github.vssavin.usmancore.spring6.user.UserService;
+import jakarta.servlet.http.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
+import org.springframework.util.StringUtils;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -68,35 +69,53 @@ public class UsmanAuthService extends UsmanBaseAuthenticationService
     public Collection<GrantedAuthority> processSuccessAuthentication(Authentication authentication,
             HttpServletRequest request, EventType eventType) {
 
-        if (authentication == null || authentication.getPrincipal() == null) {
-            return Collections.emptyList();
-        }
-
         User user = null;
-        try {
-            OAuth2User oAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
-            user = userService.processOAuthPostLogin(oAuth2User);
-        }
-        catch (ClassCastException e) {
-            // ignore, it's ok
-        }
+        if (eventType == EventType.LOGGED_OUT) {
+            Optional<Cookie> cookieOptional = Arrays.stream(request.getCookies())
+                .filter(cookie -> cookie.getName().equals("remember-me"))
+                .findFirst();
+            if (cookieOptional.isPresent()) {
+                String cookieValue = cookieOptional.get().getValue();
+                String userLogin = decodeCookie(cookieValue)[0];
+                user = userService.getUserByLogin(userLogin);
+            }
 
-        if (user == null && authentication.getPrincipal() instanceof User) {
-            user = userService.getUserByLogin(((User) authentication.getPrincipal()).getLogin());
+        }
+        else {
+            if (authentication == null || authentication.getPrincipal() == null) {
+                return Collections.emptyList();
+            }
+
+            try {
+                OAuth2User oAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
+                user = userService.processOAuthPostLogin(oAuth2User);
+            }
+            catch (ClassCastException e) {
+                // ignore, it's ok
+            }
+
+            if (user == null && authentication.getPrincipal() instanceof User) {
+                user = userService.getUserByLogin(((User) authentication.getPrincipal()).getLogin());
+            }
+
+            if (user == null) {
+                user = userService.getUserByLogin(authentication.getPrincipal().toString());
+            }
+
+            if (user == null) {
+                throw new UserNotFoundException(
+                        String.format("User [%s] not found!", authentication.getPrincipal().toString()));
+            }
+
+            if (user.getExpirationDate().before(new Date())) {
+                userService.deleteUser(user);
+                throw new UserExpiredException(String.format("User [%s] has been expired!", user.getLogin()));
+            }
         }
 
         if (user == null) {
-            user = userService.getUserByLogin(authentication.getPrincipal().toString());
-        }
-
-        if (user == null) {
-            throw new UserNotFoundException(
-                    String.format("User [%s] not found!", authentication.getPrincipal().toString()));
-        }
-
-        if (user.getExpirationDate().before(new Date())) {
-            userService.deleteUser(user);
-            throw new UserExpiredException(String.format("User [%s] has been expired!", user.getLogin()));
+            String userLogin = authentication.getPrincipal().toString();
+            throw new AuthenticationForbiddenException("User " + userLogin + " not found!");
         }
 
         saveUserEvent(user, request, eventType);
@@ -111,9 +130,7 @@ public class UsmanAuthService extends UsmanBaseAuthenticationService
         int failureCounts = getFailureCount(ipAddress);
         if (failureCounts >= maxFailureCount) {
             long expireTime = getBanExpirationTime(ipAddress);
-            if (expireTime > 0 && System.currentTimeMillis() < expireTime) {
-                return false;
-            }
+            return expireTime <= 0 || System.currentTimeMillis() >= expireTime;
         }
         return true;
     }
@@ -149,6 +166,11 @@ public class UsmanAuthService extends UsmanBaseAuthenticationService
         if (aClass != null && UsmanSecureServiceArgumentsHandler.class.isAssignableFrom(aClass)) {
             super.setSecureService(usmanConfigurer.getSecureService());
         }
+    }
+
+    private String[] decodeCookie(String cookieValue) {
+        String cookieAsPlainText = new String(Base64.getDecoder().decode(cookieValue.getBytes()));
+        return StringUtils.delimitedListToStringArray(cookieAsPlainText, ":");
     }
 
     private void saveUserEvent(User user, HttpServletRequest request, EventType eventType) {
