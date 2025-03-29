@@ -47,7 +47,6 @@ public class EventService {
         try {
             Event event = new Event(user.getId(), eventType, new Timestamp(System.currentTimeMillis()), eventMessage,
                     user);
-            event = eventRepository.save(event);
             user.getEvents().add(event);
             return eventMapper.toDto(event);
         }

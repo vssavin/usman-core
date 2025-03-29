@@ -50,7 +50,6 @@ public class EventServiceTest {
         when(eventRepository.findAll(eq(containsUserEventPredicate), any(Pageable.class)))
             .thenReturn(new PageImpl<>(eventList));
         when(eventRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(eventList));
-        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
