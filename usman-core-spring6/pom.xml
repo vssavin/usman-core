@@ -4,13 +4,13 @@
 
     <groupId>com.github.vssavin.usman-core</groupId>
     <artifactId>usman-core-spring6</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
     <packaging>jar</packaging>
 
     <properties>
         <java.version>17</java.version>
         <springframework.version>6.2.5</springframework.version>
-        <spring.data.version>3.4.0</spring.data.version>
+        <spring.data.version>3.4.4</spring.data.version>
         <spring.security.version>6.4.4</spring.security.version>
         <spring.test.version>6.2.5</spring.test.version>
         <spring.boot.starter.version>3.4.4</spring.boot.starter.version>
@@ -22,7 +22,7 @@
     <parent>
         <groupId>com.github.vssavin</groupId>
         <artifactId>usman-core-parent</artifactId>
-        <version>0.0.3</version>
+        <version>0.0.4</version>
     </parent>
 
     <dependencies>
