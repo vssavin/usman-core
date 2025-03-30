@@ -4,13 +4,13 @@
 
     <groupId>com.github.vssavin.usman-core</groupId>
     <artifactId>usman-core-spring5</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
     <packaging>jar</packaging>
 
     <parent>
         <groupId>com.github.vssavin</groupId>
         <artifactId>usman-core-parent</artifactId>
-        <version>0.0.4</version>
+        <version>0.0.5</version>
     </parent>
 
     <properties>
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>com.github.vssavin.usman-core</groupId>
             <artifactId>usman-core</artifactId>
-            <version>0.0.2</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.annotation</groupId>
