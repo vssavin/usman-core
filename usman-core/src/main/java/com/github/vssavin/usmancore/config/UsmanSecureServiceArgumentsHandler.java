@@ -40,7 +40,7 @@ public class UsmanSecureServiceArgumentsHandler extends AbstractApplicationArgum
     private String secureServiceName;
 
     @Autowired
-    UsmanSecureServiceArgumentsHandler(ApplicationContext applicationContext, UsmanConfigurer usmanConfigurer,
+    public UsmanSecureServiceArgumentsHandler(ApplicationContext applicationContext, UsmanConfigurer usmanConfigurer,
             SecureService secureService, List<ArgumentsProcessedNotifier> notifiers) {
         super(log, applicationContext);
         this.context = applicationContext;

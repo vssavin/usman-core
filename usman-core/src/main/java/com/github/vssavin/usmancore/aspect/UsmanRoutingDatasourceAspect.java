@@ -20,14 +20,14 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Component
-class UsmanRoutingDatasourceAspect {
+public class UsmanRoutingDatasourceAspect {
 
     private static final Logger log = LoggerFactory.getLogger(UsmanRoutingDatasourceAspect.class);
 
     private final DataSourceSwitcher dataSourceSwitcher;
 
     @Autowired
-    UsmanRoutingDatasourceAspect(DataSourceSwitcher dataSourceSwitcher) {
+    public UsmanRoutingDatasourceAspect(DataSourceSwitcher dataSourceSwitcher) {
         this.dataSourceSwitcher = dataSourceSwitcher;
     }
 

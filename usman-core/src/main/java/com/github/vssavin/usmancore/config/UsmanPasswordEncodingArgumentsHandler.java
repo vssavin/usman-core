@@ -46,7 +46,7 @@ public class UsmanPasswordEncodingArgumentsHandler extends AbstractApplicationAr
     private final PrintStream passwordPrintStream;
 
     @Autowired
-    UsmanPasswordEncodingArgumentsHandler(ApplicationContext applicationContext,
+    public UsmanPasswordEncodingArgumentsHandler(ApplicationContext applicationContext,
             @Qualifier("applicationSecureService") OSPlatformCrypt applicationSecureService,
             @Autowired(required = false) PrintStream passwordPrintStream) {
         super(log, applicationContext);

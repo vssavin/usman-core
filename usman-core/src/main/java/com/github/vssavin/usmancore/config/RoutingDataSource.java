@@ -12,7 +12,7 @@ import java.util.Map;
  *
  * @author vssavin on 28.11.2023.
  */
-class RoutingDataSource extends AbstractRoutingDataSource {
+public class RoutingDataSource extends AbstractRoutingDataSource {
 
     enum DATASOURCE_TYPE {
 
@@ -32,7 +32,7 @@ class RoutingDataSource extends AbstractRoutingDataSource {
         return datasourceKey;
     }
 
-    RoutingDataSource() {
+    public RoutingDataSource() {
         setTargetDataSources(dataSources);
     }
 
