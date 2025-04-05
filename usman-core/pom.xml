@@ -2,16 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.github.vssavin.usman-core</groupId>
-    <artifactId>usman-core</artifactId>
-    <version>0.0.5</version>
-    <packaging>jar</packaging>
-
     <parent>
         <groupId>com.github.vssavin</groupId>
         <artifactId>usman-core-parent</artifactId>
-        <version>0.0.5</version>
+        <version>0.0.6</version>
     </parent>
+
+    <groupId>com.github.vssavin.usman-core</groupId>
+    <artifactId>usman-core</artifactId>
+    <version>${parent.version}</version>
+    <packaging>jar</packaging>
 
     <properties>
         <java.version>1.8</java.version>
