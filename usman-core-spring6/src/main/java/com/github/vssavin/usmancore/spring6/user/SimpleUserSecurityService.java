@@ -2,6 +2,8 @@ package com.github.vssavin.usmancore.spring6.user;
 
 import com.github.vssavin.usmancore.config.Role;
 import com.github.vssavin.usmancore.exception.user.EmailNotFoundException;
+import com.github.vssavin.usmancore.user.UsmanUser;
+import com.github.vssavin.usmancore.user.UsmanUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,10 +20,10 @@ import java.security.Principal;
 @Service
 public class SimpleUserSecurityService implements UserSecurityService {
 
-    private final UserService userService;
+    private final UsmanUserService userService;
 
     @Autowired
-    public SimpleUserSecurityService(UserService userService) {
+    public SimpleUserSecurityService(UsmanUserService userService) {
         this.userService = userService;
     }
 
@@ -53,7 +55,7 @@ public class SimpleUserSecurityService implements UserSecurityService {
 
     @Override
     public String getAuthorizedUserLogin(HttpServletRequest request) {
-        User user;
+        UsmanUser user;
         try {
             user = getAuthorizedUser(request);
         }
@@ -65,7 +67,7 @@ public class SimpleUserSecurityService implements UserSecurityService {
 
     @Override
     public boolean isAuthorizedAdmin(HttpServletRequest request) {
-        User user = null;
+        UsmanUser user = null;
         try {
             user = getAuthorizedUser(request);
         }
@@ -77,7 +79,7 @@ public class SimpleUserSecurityService implements UserSecurityService {
 
     @Override
     public boolean isAuthorizedUser(HttpServletRequest request) {
-        User user = null;
+        UsmanUser user = null;
         try {
             user = getAuthorizedUser(request);
         }
@@ -88,9 +90,9 @@ public class SimpleUserSecurityService implements UserSecurityService {
         return user != null && Role.getRole(user.getAuthority()) == Role.ROLE_USER;
     }
 
-    private User getAuthorizedUser(HttpServletRequest request) {
+    private UsmanUser getAuthorizedUser(HttpServletRequest request) {
         Principal principal = request.getUserPrincipal();
-        User user = null;
+        UsmanUser user = null;
         if (principal != null) {
             if (principal instanceof OAuth2AuthenticationToken) {
                 user = userService.getUserByOAuth2Token((OAuth2AuthenticationToken) principal);

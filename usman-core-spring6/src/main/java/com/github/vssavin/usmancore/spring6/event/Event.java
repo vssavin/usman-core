@@ -1,8 +1,10 @@
 package com.github.vssavin.usmancore.spring6.event;
 
 import com.github.vssavin.usmancore.event.EventType;
+import com.github.vssavin.usmancore.event.UsmanEvent;
 import com.github.vssavin.usmancore.spring6.user.User;
 
+import com.github.vssavin.usmancore.user.UsmanUser;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -14,7 +16,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "events")
-public class Event {
+public class Event implements UsmanEvent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,12 +46,12 @@ public class Event {
         this.eventMessage = eventMessage;
     }
 
-    public Event(Long userId, EventType eventType, Date eventTimestamp, String eventMessage, User user) {
+    public Event(Long userId, EventType eventType, Date eventTimestamp, String eventMessage, UsmanUser user) {
         this.userId = userId;
         this.eventType = eventType;
         this.eventTimestamp = eventTimestamp;
         this.eventMessage = eventMessage;
-        this.user = user;
+        this.user = (User) user;
     }
 
     public Event() {

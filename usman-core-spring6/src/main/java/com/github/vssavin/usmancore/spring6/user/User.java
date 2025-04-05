@@ -1,12 +1,14 @@
 package com.github.vssavin.usmancore.spring6.user;
 
+import com.github.vssavin.usmancore.event.UsmanEvent;
 import com.github.vssavin.usmancore.spring6.event.Event;
+import com.github.vssavin.usmancore.user.UsmanUser;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Base user management entity.
@@ -15,7 +17,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "users")
-public class User implements UserDetails {
+public class User implements UsmanUser {
 
     public static final int EXPIRATION_DAYS = 1;
 
@@ -65,14 +67,17 @@ public class User implements UserDetails {
     public User() {
     }
 
+    @Override
     public Long getId() {
         return id;
     }
 
+    @Override
     public String getLogin() {
         return login;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -82,6 +87,7 @@ public class User implements UserDetails {
         return Collections.singleton(new SimpleGrantedAuthority(authority));
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
@@ -111,73 +117,96 @@ public class User implements UserDetails {
         return enabled != 0;
     }
 
+    @Override
     public String getEmail() {
         return email;
     }
 
+    @Override
     public String getAuthority() {
         return authority;
     }
 
+    @Override
     public Date getExpirationDate() {
         return expirationDate;
     }
 
+    @Override
     public String getVerificationId() {
         return verificationId;
     }
 
-    public List<Event> getEvents() {
-        return events;
+    @Override
+    public List<UsmanEvent> getEvents() {
+        return events.stream().map(event -> (UsmanEvent) (event)).toList();
     }
 
+    @Override
     public void setId(Long id) {
         this.id = id;
     }
 
+    @Override
     public void setLogin(String login) {
         this.login = login;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public void setPassword(String password) {
         this.password = password;
     }
 
+    @Override
     public void setEmail(String email) {
         this.email = email;
     }
 
+    @Override
     public void setAuthority(String authority) {
         this.authority = authority;
     }
 
+    @Override
     public void setExpirationDate(Date expirationDate) {
         this.expirationDate = expirationDate;
     }
 
+    @Override
     public void setVerificationId(String verificationId) {
         this.verificationId = verificationId;
     }
 
+    @Override
     public void setAccountLocked(boolean accountLocked) {
         this.accountLocked = accountLocked ? 1 : 0;
     }
 
+    @Override
     public void setCredentialsExpired(boolean credentialsExpired) {
         this.credentialsExpired = credentialsExpired ? 1 : 0;
     }
 
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled ? 1 : 0;
     }
 
-    public void setEvents(List<Event> events) {
+    @Override
+    public void setEvents(List<UsmanEvent> usmanEvents) {
+        List<Event> events = usmanEvents.stream().map(event -> (Event) (event)).collect(Collectors.toList());
         this.events.retainAll(events);
         this.events.addAll(events);
+    }
+
+    @Override
+    public void addEvent(UsmanEvent usmanEvent) {
+        this.events.add((Event) usmanEvent);
     }
 
     public static UserBuilder builder() {

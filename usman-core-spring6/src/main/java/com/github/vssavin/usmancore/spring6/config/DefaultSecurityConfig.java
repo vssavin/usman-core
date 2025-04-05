@@ -5,9 +5,9 @@ import com.github.vssavin.usmancore.spring6.security.auth.UsmanBlackListFilter;
 import com.github.vssavin.usmancore.spring6.security.csrf.UmCsrfTokenRepository;
 import com.github.vssavin.usmancore.spring6.security.csrf.UserCsrfTokenRepository;
 import com.github.vssavin.usmancore.spring6.security.rememberme.Authenticator;
-import com.github.vssavin.usmancore.spring6.security.rememberme.RefreshOnLoginDatabaseTokenBasedRememberMeService;
+import com.github.vssavin.usmancore.spring6.security.rememberme.RefreshOnAutologinTokenBasedRememberMeServices;
 import com.github.vssavin.usmancore.spring6.security.rememberme.UserRememberMeTokenRepository;
-import com.github.vssavin.usmancore.spring6.user.UserService;
+import com.github.vssavin.usmancore.user.UsmanUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -40,7 +40,7 @@ import java.util.*;
  */
 public class DefaultSecurityConfig {
 
-    private final UserService userService;
+    private final UsmanUserService userService;
 
     private final AuthenticationSuccessHandler authSuccessHandler;
 
@@ -57,7 +57,7 @@ public class DefaultSecurityConfig {
     private final UserCsrfTokenRepository csrfTokenRepository;
 
     @Autowired
-    public DefaultSecurityConfig(UserService userService, DefaultAuthConfig defaultAuthConfig,
+    public DefaultSecurityConfig(UsmanUserService userService, DefaultAuthConfig defaultAuthConfig,
             OAuth2Config oAuth2Config, UserRememberMeTokenRepository rememberMeTokenRepository,
             UserCsrfTokenRepository csrfTokenRepository) {
         this.userService = userService;
@@ -95,8 +95,8 @@ public class DefaultSecurityConfig {
 
         String secretKey = UUID.randomUUID().toString();
 
-        AbstractRememberMeServices rememberMeServices = new RefreshOnLoginDatabaseTokenBasedRememberMeService(secretKey,
-                userService, rememberMeTokenRepository);
+        AbstractRememberMeServices rememberMeServices = new RefreshOnAutologinTokenBasedRememberMeServices(secretKey,
+                userService);
         rememberMeServices.setAlwaysRemember(true);
         rememberMeServices.setTokenValiditySeconds(usmanConfigurer.getRememberMeTokenValiditySeconds());
 

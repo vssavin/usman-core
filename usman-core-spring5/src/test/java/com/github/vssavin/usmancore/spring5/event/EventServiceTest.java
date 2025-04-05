@@ -4,6 +4,7 @@ import com.github.vssavin.usmancore.data.pagination.Paged;
 import com.github.vssavin.usmancore.event.EventDto;
 import com.github.vssavin.usmancore.event.EventFilter;
 import com.github.vssavin.usmancore.event.EventType;
+import com.github.vssavin.usmancore.event.UsmanEventService;
 import com.github.vssavin.usmancore.exception.event.EventServiceException;
 import com.github.vssavin.usmancore.spring5.user.User;
 import com.querydsl.core.types.Predicate;
@@ -39,7 +40,7 @@ public class EventServiceTest {
     @Mock
     private EventRepository eventRepository;
 
-    private EventService eventService;
+    private UsmanEventService eventService;
 
     @Before
     public void setUp() {
@@ -53,16 +54,16 @@ public class EventServiceTest {
     }
 
     @Test
-    public void shouldCreateEventSuccess() {
+    public void shouldAddUserEventSuccess() {
         User user = new User("", "", "", "", "");
-        EventDto eventDto = eventService.createEvent(user, EventType.LOGGED_IN, "User created");
+        EventDto eventDto = eventService.addUserEvent(user, EventType.LOGGED_IN, "User created");
         Event event = eventMapper.toEntity(eventDto);
         Assert.assertEquals("User should be equal!", user, event.getUser());
     }
 
     @Test(expected = EventServiceException.class)
-    public void shouldThrowException_WhenCreateEventWithWrongUser() {
-        eventService.createEvent(null, EventType.LOGGED_OUT, "");
+    public void shouldThrowException_WhenAddUserEventWithWrongUser() {
+        eventService.addUserEvent(null, EventType.LOGGED_OUT, "");
     }
 
     @Test

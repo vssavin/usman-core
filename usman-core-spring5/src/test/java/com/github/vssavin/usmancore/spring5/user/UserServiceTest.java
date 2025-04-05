@@ -7,6 +7,7 @@ import com.github.vssavin.usmancore.exception.user.EmailNotFoundException;
 import com.github.vssavin.usmancore.exception.user.UserNotFoundException;
 import com.github.vssavin.usmancore.exception.user.UserServiceException;
 import com.github.vssavin.usmancore.user.UserFilter;
+import com.github.vssavin.usmancore.user.UsmanUser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -107,20 +108,20 @@ public class UserServiceTest {
     @Test
     public void shouldGetUsersEmptyPage() {
         UserFilter filter = new UserFilter(-1L, "", "", "");
-        Paged<User> users = userService.getUsers(filter, 1, 1);
+        Paged<UsmanUser> users = userService.getUsers(filter, 1, 1);
         Assert.assertTrue(users.getPage().getContent().isEmpty());
     }
 
     @Test
     public void shouldGetUsersNotEmptyPageWhenParamsValid() {
-        Paged<User> users = userService.getUsers(null, 1, 1);
+        Paged<UsmanUser> users = userService.getUsers(null, 1, 1);
         Assert.assertFalse(users.getPage().getContent().isEmpty());
     }
 
     @Test
     public void shouldGetUsersNotEmptyPage() {
         UserFilter filter = new UserFilter(null, adminUser.getLogin(), "", "");
-        Paged<User> users = userService.getUsers(filter, 1, 1);
+        Paged<UsmanUser> users = userService.getUsers(filter, 1, 1);
         Assert.assertFalse(users.getPage().getContent().isEmpty());
     }
 
@@ -141,7 +142,7 @@ public class UserServiceTest {
 
     @Test
     public void shouldGetUserByNameExistentName() {
-        User user = userService.getUserByName(adminUser.getName());
+        UsmanUser user = userService.getUserByName(adminUser.getName());
         Assert.assertEquals(adminUser.getName(), user.getName());
     }
 
@@ -152,7 +153,7 @@ public class UserServiceTest {
 
     @Test
     public void shouldGetUserByLoginExistentLogin() {
-        User user = userService.getUserByLogin(adminUser.getLogin());
+        UsmanUser user = userService.getUserByLogin(adminUser.getLogin());
         Assert.assertEquals(adminUser.getLogin(), user.getLogin());
     }
 
@@ -163,13 +164,13 @@ public class UserServiceTest {
 
     @Test
     public void shouldGetUserByEmailExistentEmail() {
-        User user = userService.getUserByEmail(adminUser.getEmail());
+        UsmanUser user = userService.getUserByEmail(adminUser.getEmail());
         Assert.assertEquals(adminUser.getEmail(), user.getEmail());
     }
 
     @Test
     public void shouldGetUserRecoveryIdExistentLogin() {
-        Map<String, User> recoveryIds = userService.getUserRecoveryId(adminUser.getLogin());
+        Map<String, UsmanUser> recoveryIds = userService.getUserRecoveryId(adminUser.getLogin());
         Optional<String> optionalRecoveryId = recoveryIds.keySet().stream().findFirst();
         Assert.assertTrue(optionalRecoveryId.isPresent());
         User user = userService.getUserByRecoveryId(optionalRecoveryId.get());
@@ -178,7 +179,7 @@ public class UserServiceTest {
 
     @Test
     public void shouldGetUserRecoveryIdExistentEmail() {
-        Map<String, User> recoveryIds = userService.getUserRecoveryId(adminUser.getEmail());
+        Map<String, UsmanUser> recoveryIds = userService.getUserRecoveryId(adminUser.getEmail());
         Optional<String> optionalRecoveryId = recoveryIds.keySet().stream().findFirst();
         Assert.assertTrue(optionalRecoveryId.isPresent());
         User user = userService.getUserByRecoveryId(optionalRecoveryId.get());
@@ -198,14 +199,14 @@ public class UserServiceTest {
     @Test
     public void shouldProcessOauthPostLoginUserExists() {
         OAuth2User oAuth2User = createUser(adminUser.getEmail());
-        User user = userService.processOAuthPostLogin(oAuth2User);
+        UsmanUser user = userService.processOAuthPostLogin(oAuth2User);
         Assert.assertEquals(adminUser, user);
     }
 
     @Test
     public void shouldProcessOauthPostLoginUserNotExists() {
         OAuth2User oAuth2User = createUser(oAuthUser.getEmail());
-        User user = userService.processOAuthPostLogin(oAuth2User);
+        UsmanUser user = userService.processOAuthPostLogin(oAuth2User);
         Assert.assertEquals(oAuthUser, user);
     }
 
@@ -214,7 +215,7 @@ public class UserServiceTest {
         Mockito.when(userRepository.findByEmail(oAuthUser.getLogin())).thenReturn(Collections.singletonList(oAuthUser));
         OAuth2User oAuth2User = createUser(oAuthUser.getEmail());
         OAuth2AuthenticationToken token = new OAuth2AuthenticationToken(oAuth2User, oAuth2User.getAuthorities(), "id");
-        User user = userService.getUserByOAuth2Token(token);
+        UsmanUser user = userService.getUserByOAuth2Token(token);
         Assert.assertEquals(oAuthUser, user);
     }
 
@@ -222,7 +223,7 @@ public class UserServiceTest {
     public void shouldGetUserByOAuth2TokenUserNotExists() {
         OAuth2User oAuth2User = createUser(emptyUser.getEmail());
         OAuth2AuthenticationToken token = new OAuth2AuthenticationToken(oAuth2User, oAuth2User.getAuthorities(), "id");
-        User user = userService.getUserByOAuth2Token(token);
+        UsmanUser user = userService.getUserByOAuth2Token(token);
         Assert.assertNull(user);
     }
 

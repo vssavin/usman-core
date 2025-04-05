@@ -6,12 +6,13 @@ import com.github.vssavin.usmancore.config.ArgumentsProcessedNotifier;
 import com.github.vssavin.usmancore.config.UsmanConfigurer;
 import com.github.vssavin.usmancore.config.UsmanSecureServiceArgumentsHandler;
 import com.github.vssavin.usmancore.event.EventType;
+import com.github.vssavin.usmancore.event.UsmanEventService;
 import com.github.vssavin.usmancore.exception.auth.AuthenticationForbiddenException;
 import com.github.vssavin.usmancore.exception.user.UserExpiredException;
 import com.github.vssavin.usmancore.exception.user.UserNotFoundException;
-import com.github.vssavin.usmancore.spring6.event.EventService;
 import com.github.vssavin.usmancore.spring6.user.User;
-import com.github.vssavin.usmancore.spring6.user.UserService;
+import com.github.vssavin.usmancore.user.UsmanUser;
+import com.github.vssavin.usmancore.user.UsmanUserService;
 import jakarta.servlet.http.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,15 +49,15 @@ public class UsmanAuthService extends UsmanBaseAuthenticationService
 
     private static final Logger log = LoggerFactory.getLogger(UsmanAuthService.class);
 
-    private final UserService userService;
+    private final UsmanUserService userService;
 
-    private final EventService eventService;
+    private final UsmanEventService eventService;
 
     private final UsmanConfigurer usmanConfigurer;
 
     @Autowired
-    public UsmanAuthService(UserService userService, EventService eventService, UsmanConfigurer usmanConfigurer,
-            PasswordEncoder passwordEncoder) {
+    public UsmanAuthService(UsmanUserService userService, UsmanEventService eventService,
+            UsmanConfigurer usmanConfigurer, PasswordEncoder passwordEncoder) {
         super(userService, passwordEncoder, usmanConfigurer.getSecureService(), usmanConfigurer);
         this.userService = userService;
         this.eventService = eventService;
@@ -69,7 +70,7 @@ public class UsmanAuthService extends UsmanBaseAuthenticationService
     public Collection<GrantedAuthority> processSuccessAuthentication(Authentication authentication,
             HttpServletRequest request, EventType eventType) {
 
-        User user = null;
+        UsmanUser user = null;
         if (eventType == EventType.LOGGED_OUT) {
             Optional<Cookie> cookieOptional = Arrays.stream(request.getCookies())
                 .filter(cookie -> cookie.getName().equals("remember-me"))
@@ -173,7 +174,7 @@ public class UsmanAuthService extends UsmanBaseAuthenticationService
         return StringUtils.delimitedListToStringArray(cookieAsPlainText, ":");
     }
 
-    private void saveUserEvent(User user, HttpServletRequest request, EventType eventType) {
+    private void saveUserEvent(UsmanUser user, HttpServletRequest request, EventType eventType) {
         String message = "";
         switch (eventType) {
             case LOGGED_IN:
@@ -183,7 +184,7 @@ public class UsmanAuthService extends UsmanBaseAuthenticationService
                 message = String.format("User [%s] logged out using IP: %s", user.getLogin(), request.getRemoteAddr());
                 break;
         }
-        eventService.createEvent(user, eventType, message);
+        eventService.addUserEvent(user, eventType, message);
     }
 
 }

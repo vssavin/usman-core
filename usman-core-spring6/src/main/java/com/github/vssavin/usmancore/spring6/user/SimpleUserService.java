@@ -6,6 +6,8 @@ import com.github.vssavin.usmancore.data.pagination.Paged;
 import com.github.vssavin.usmancore.data.pagination.Paging;
 import com.github.vssavin.usmancore.exception.user.*;
 import com.github.vssavin.usmancore.user.UserFilter;
+import com.github.vssavin.usmancore.user.UsmanUser;
+import com.github.vssavin.usmancore.user.UsmanUserService;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.SimpleExpression;
@@ -34,7 +36,7 @@ import java.util.stream.IntStream;
  * @author vssavin on 07.12.2023.
  */
 @Service
-public class SimpleUserService implements UserService {
+public class SimpleUserService implements UsmanUserService {
 
     private static final Map<String, UserRecoveryParams> passwordRecoveryIds = new ConcurrentHashMap<>();
 
@@ -50,20 +52,20 @@ public class SimpleUserService implements UserService {
 
     @UsmanRouteDatasource
     @Override
-    public Paged<User> getUsers(UserFilter userFilter, int pageNumber, int size) {
+    public Paged<UsmanUser> getUsers(UserFilter userFilter, int pageNumber, int size) {
         String errorMessage = String.format(
                 "Error while search user with params: pageNumber = %d, size = %d, filter: [%s]!", pageNumber, size,
                 userFilter);
-        Page<User> users;
+        Page<UsmanUser> users;
         Pageable pageable;
         try {
             pageable = PageRequest.of(pageNumber - 1, size);
             if (userFilter == null || userFilter.isEmpty()) {
-                users = userRepository.findAll(pageable);
+                users = userRepository.findAll(pageable).map(usmanUser -> usmanUser);
             }
             else {
                 Predicate predicate = userFilterToPredicate(userFilter);
-                users = userRepository.findAll(predicate, pageable);
+                users = userRepository.findAll(predicate, pageable).map(usmanUser -> usmanUser);
             }
 
             return new Paged<>(users, Paging.of(users.getTotalPages(), pageNumber, size));
@@ -93,9 +95,9 @@ public class SimpleUserService implements UserService {
 
     @UsmanRouteDatasource
     @Override
-    public User addUser(User user) {
+    public UsmanUser addUser(UsmanUser user) {
         try {
-            return userRepository.save(user);
+            return userRepository.save((User) user);
         }
         catch (Exception e) {
             throw new UserServiceException(String.format("Adding error for user [%s]!", user), e);
@@ -104,9 +106,9 @@ public class SimpleUserService implements UserService {
 
     @UsmanRouteDatasource
     @Override
-    public User updateUser(User user) {
+    public UsmanUser updateUser(UsmanUser user) {
         try {
-            return userRepository.save(user);
+            return userRepository.save((User) user);
         }
         catch (Exception e) {
             throw new UserServiceException(String.format("Update error for user [%s]", user), e);
@@ -115,7 +117,7 @@ public class SimpleUserService implements UserService {
 
     @UsmanRouteDatasource
     @Override
-    public User getUserByName(String name) {
+    public UsmanUser getUserByName(String name) {
         try {
             List<User> users = userRepository.findUserByName(name);
             if (!users.isEmpty()) {
@@ -131,7 +133,7 @@ public class SimpleUserService implements UserService {
 
     @UsmanRouteDatasource
     @Override
-    public User getUserByLogin(String login) {
+    public UsmanUser getUserByLogin(String login) {
         List<User> users;
         try {
             users = userRepository.findByLogin(login);
@@ -148,7 +150,7 @@ public class SimpleUserService implements UserService {
 
     @UsmanRouteDatasource
     @Override
-    public User getUserByEmail(String email) {
+    public UsmanUser getUserByEmail(String email) {
         List<User> users;
         try {
             users = userRepository.findByEmail(email);
@@ -165,7 +167,7 @@ public class SimpleUserService implements UserService {
 
     @UsmanRouteDatasource
     @Override
-    public void deleteUser(User user) {
+    public void deleteUser(UsmanUser user) {
         Objects.requireNonNull(user, "User must not be null!");
         try {
             userRepository.deleteByLogin(user.getLogin());
@@ -177,8 +179,8 @@ public class SimpleUserService implements UserService {
 
     @UsmanRouteDatasource
     @Override
-    public User registerUser(String login, String username, String password, String email, Role role) {
-        User user = null;
+    public UsmanUser registerUser(String login, String username, String password, String email, Role role) {
+        UsmanUser user = null;
         try {
             user = getUserByLogin(login);
         }
@@ -202,7 +204,7 @@ public class SimpleUserService implements UserService {
     @UsmanRouteDatasource
     @Override
     public void confirmUser(String login, String verificationId, boolean isAdminUser) {
-        User user = null;
+        UsmanUser user = null;
         try {
             user = getUserByLogin(login);
         }
@@ -251,7 +253,7 @@ public class SimpleUserService implements UserService {
 
     @UsmanRouteDatasource
     @Override
-    public Map<String, User> getUserRecoveryId(String loginOrEmail) {
+    public Map<String, UsmanUser> getUserRecoveryId(String loginOrEmail) {
         String errorMessage = String.format("Error while getting recovery id, login/email = [%s]", loginOrEmail);
         User user = findUserByLoginOrEmail(loginOrEmail, errorMessage);
 
@@ -276,7 +278,7 @@ public class SimpleUserService implements UserService {
         if (role.equals(Role.ROLE_ADMIN)) {
             if (authorizedName != null && !authorizedName.isEmpty()) {
                 try {
-                    User admin = getUserByLogin(authorizedName);
+                    UsmanUser admin = getUserByLogin(authorizedName);
                     if (!Role.ROLE_ADMIN.name().equals(admin.getAuthority())) {
                         granted = false;
                     }
@@ -295,8 +297,8 @@ public class SimpleUserService implements UserService {
 
     @UsmanRouteDatasource
     @Override
-    public User processOAuthPostLogin(OAuth2User oAuth2User) {
-        User user = null;
+    public UsmanUser processOAuthPostLogin(OAuth2User oAuth2User) {
+        UsmanUser user = null;
         String email = oAuth2User.getAttribute("email");
         try {
             user = getUserByEmail(email);
@@ -315,7 +317,7 @@ public class SimpleUserService implements UserService {
 
     @UsmanRouteDatasource
     @Override
-    public User getUserByOAuth2Token(OAuth2AuthenticationToken token) {
+    public UsmanUser getUserByOAuth2Token(OAuth2AuthenticationToken token) {
         OAuth2User oAuth2User = token.getPrincipal();
         String email = oAuth2User.getAttribute("email");
         try {
@@ -332,7 +334,8 @@ public class SimpleUserService implements UserService {
         return getUserByLogin(username);
     }
 
-    Predicate userFilterToPredicate(UserFilter userFilter) {
+    @Override
+    public Predicate userFilterToPredicate(UserFilter userFilter) {
         BooleanExpression expression = null;
         QUser user = QUser.user;
         expression = processAndEqualLong(expression, user.id, userFilter.getUserId());
@@ -342,7 +345,8 @@ public class SimpleUserService implements UserService {
         return expression;
     }
 
-    BooleanExpression processAndEqualLong(BooleanExpression expression, SimpleExpression<Long> simpleExpression,
+    @Override
+    public BooleanExpression processAndEqualLong(BooleanExpression expression, SimpleExpression<Long> simpleExpression,
             Long value) {
         if (value != null) {
             if (expression != null) {
@@ -356,7 +360,8 @@ public class SimpleUserService implements UserService {
         return expression;
     }
 
-    BooleanExpression processAndLikeString(BooleanExpression expression, StringExpression stringExpression,
+    @Override
+    public BooleanExpression processAndLikeString(BooleanExpression expression, StringExpression stringExpression,
             String value) {
         if (value != null && !value.isEmpty()) {
             if (expression != null) {
