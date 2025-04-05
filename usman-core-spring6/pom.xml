@@ -10,7 +10,7 @@
 
     <groupId>com.github.vssavin.usman-core</groupId>
     <artifactId>usman-core-spring6</artifactId>
-    <version>${parent.version}</version>
+    <version>${project.parent.version}</version>
     <packaging>jar</packaging>
 
     <properties>
